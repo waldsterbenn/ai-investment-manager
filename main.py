@@ -19,7 +19,7 @@ sec_data_api_key = "SEC_API_KEY"  # Must match dict in config file
 
 class InvestmentPortfolioManager:
     def __init__(self, apiKeys: dict, symbol: str):
-        self.symbol = symbol
+        self.ticker_symbol = symbol
         self.sec_fetcher = SECDataFetcher(apiKeys[sec_data_api_key])
         self.fmp_fetcher = FMPDataFetcher()
         self.finnhub_fetcher = FinnhubDataFetcher()
@@ -31,10 +31,10 @@ class InvestmentPortfolioManager:
 
     def run(self):
         # Fetch data
-        sec_data = self.sec_fetcher.fetch_data(self.symbol)
-        fmp_data = self.fmp_fetcher.fetch_data(self.symbol)
-        finnhub_data = self.finnhub_fetcher.fetch_data(self.symbol)
-        yfinance_data = self.yfinance_fetcher.fetch_data(self.symbol)
+        sec_data = self.sec_fetcher.fetch_data(self.ticker_symbol)
+        fmp_data = self.fmp_fetcher.fetch_data(self.ticker_symbol)
+        finnhub_data = self.finnhub_fetcher.fetch_data(self.ticker_symbol)
+        yfinance_data = self.yfinance_fetcher.fetch_data(self.ticker_symbol)
 
         # Analyze data
         techical_data = {}
@@ -55,7 +55,7 @@ class InvestmentPortfolioManager:
             financial_analysis, advice)
 
         # Output report
-        with open(f"{self.symbol}_report.md", "w") as file:
+        with open(f"{self.ticker_symbol}_report.md", "w") as file:
             file.write(report)
 
 
