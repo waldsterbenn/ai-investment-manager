@@ -1,0 +1,7 @@
+// Rename this file to api_keys.json
+[
+    {
+        "id": "SEC_API_KEY",
+        "value": "<KEY>"
+    }
+]
