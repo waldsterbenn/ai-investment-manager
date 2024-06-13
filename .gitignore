@@ -1,0 +1,6 @@
+.conda_invst_mgr/
+reports/
+
+config/api_keys.json
+
+app.log

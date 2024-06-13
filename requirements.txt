@@ -1,0 +1,7 @@
+ollama
+yfinance
+pandas
+requests
+tabulate
+llama-index-core
+llama-index-llms-ollama
