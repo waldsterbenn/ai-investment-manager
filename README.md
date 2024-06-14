@@ -4,6 +4,10 @@ By providing ticker codes for stocks in your portfolio, this system will generat
 
 [Example portfolio check](example_portfolio_advice_report.md)
 
+## Warning
+
+This project will download files to your disk (yfinance, SEC (US gov) etc.).
+
 ## Setup
 
 - Python 3.11.9
