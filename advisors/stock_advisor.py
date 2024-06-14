@@ -48,7 +48,7 @@ class Advisor:
         user_prompt = f"""
                     You are an expert financial advisor with expertice in trading on the stock market.
                     Analyse the techical and financial reports and provide investment advice.
-                    Do not respond with any disclaimers, just the advice.
+                    Be concrete and precise. Avoid generic answers and disclaimers.
                     
                     Techical report:
                     ---

@@ -48,10 +48,14 @@ class TechnicalAnalyst:
 
         user_prompt = f"""
                     You are an expert financial analyst. Analyse these technical data for for the stock: {ticker_symbol}.
-                    Be concrete and precise. Avoid generic answers.
+                    Be concrete and precise. Avoid generic answers and disclaimers.
                     Analyze trends, momentum, volatility, etc.
-                    Make a report in Markdown format.
-                    
+                    Make a report in Markdown format, containing:
+                        - Stock price.
+                        - Stock performance numbers.
+                        - Stock ytd growth.
+                        - Techical indicators (P/E, EPS, RSI etc.).
+    
                     Techical Data:
                     ---
                     {data} 

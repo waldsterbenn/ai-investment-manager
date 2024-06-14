@@ -50,7 +50,7 @@ class FinancialAnalyst:
         user_prompt = f"""
                     You are an expert financial analyst.
                     Analyse this financial statement for the stock: {ticker_symbol}.
-                    Be concrete and precise. Avoid generic answers.
+                    Be concrete and precise. Avoid generic answers and disclaimers.
                     
                     Make a report in Markdown format containing:
                     - Profitability.
@@ -58,7 +58,7 @@ class FinancialAnalyst:
                     - Upside and downside risk.
                     - Market and competition.
         
-                    Financial Statement:
+                    Financial Statement data:
                     ---
                     {data} 
                     ---
