@@ -1,9 +1,19 @@
 # Invtment portfolio manager
 
+By providing ticker codes for stocks in your portfolio, this system will generate advisory reports based on techical and finanical data. It will also run a portfolio check, with buy/hold/sell recommendations.
+
+[Example portfolio check](example_portfolio_advice_report.md)
+
 ## Setup
 
 - Python 3.11.9
 - `pip install -r requirements`
+- Install ollama and pull models you want i.e. `ollama pull qwen2` (qwen model has 128k context window which makes life easier)
+- Setup app.config with model name you want
+- Type in your stocks in app.config
+- Run with `python main.py`
+- See app.log
+- Ouput is Markdown files in folder ./reports/
 
 # Ideas
 
