@@ -11,7 +11,6 @@
     - Stock ytd growth.
     - Techical indicators (P/E, EPS, RSI etc.).
 """
-import json
 from typing import Dict
 from llama_index.llms.ollama import Ollama
 from components.data_acq_layer import StockDataTech

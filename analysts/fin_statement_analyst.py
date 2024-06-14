@@ -13,9 +13,7 @@
 """
 
 
-import json
 from typing import Dict
-import pandas as pd
 from llama_index.llms.ollama import Ollama
 from components.data_acq_layer import StockDataFin
 from tools.llm_config_factory import LlmConfigFactory, SupportedModels

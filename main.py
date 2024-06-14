@@ -1,6 +1,4 @@
-from enum import Enum
 import json
-import string
 from typing import List
 from advisors.stock_advisor import Advisor
 from components.analysis_layer import FinancialStatementAnalyst, TechnicalDataAnalyst

@@ -1,5 +1,5 @@
 from components.data_acq_layer import DataFetcher, StockDataTech
-from tools.tecnical_data_tools import fu_stock_analyzer_tool, hum_stock_analyzer_tool
+from tools.tecnical_data_tools import hum_stock_analyzer_tool
 
 
 class YFinanceDataFetcher(DataFetcher):

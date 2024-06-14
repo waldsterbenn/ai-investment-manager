@@ -4,7 +4,6 @@ import yfinance as yf
 import pandas_ta as ta
 from tabulate import tabulate
 
-from components.data_acq_layer import StockDataTech
 
 # Tools for getting stock data from Yahoo Finance.
 # Including simple techical analysis.
