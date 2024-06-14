@@ -4,11 +4,16 @@ import yfinance as yf
 import pandas_ta as ta
 from tabulate import tabulate
 
+from components.data_acq_layer import StockDataTech
+
 # Tools for getting stock data from Yahoo Finance.
 # Including simple techical analysis.
 
+yfin_allowed_timespans = ['1d', '5d', '1mo', '3mo',
+                          '6mo', '1y', '2y', '5y', '10y', 'ytd', 'max']
 
-def fetch_stock_data(ticker):
+
+def fetch_stock_data(ticker) -> tuple[dict, pd.DataFrame, pd.DataFrame]:
     """
     Fetches stock data for the given ticker using yfinance.
 
@@ -17,13 +22,13 @@ def fetch_stock_data(ticker):
     """
     # Fetch data
     data = yf.Ticker(ticker)
-    # Get historical market data for the last 9 months
-    df = data.history(period="9mo")  # Adjust the period as necessary
+    # Get historical market data for the last n months
+    df = data.history(period=yfin_allowed_timespans[4])
 
     # Ensure the DataFrame index is a DatetimeIndex
     df.index = pd.DatetimeIndex(df.index)
 
-    return df
+    return (data.info, df, data.get_recommendations_summary())
 
 
 def analyze_stock(df):
@@ -81,10 +86,12 @@ def process_analysis_results(df):
 
     return recommendations
 
+# not in use
+
 
 def fu_stock_analyzer_tool(ticker_symbol: str) -> str:
     """Returns the name of the pickled pandas dataframe, with the results of the techical indicators."""
-    df = fetch_stock_data(ticker_symbol)
+    (info, df) = fetch_stock_data(ticker_symbol)
     df_with_analysis = analyze_stock(df)
     pickle_filename = f"{ticker_symbol}_analysis.pkl"
     df_with_analysis.to_pickle(pickle_filename)
@@ -92,16 +99,17 @@ def fu_stock_analyzer_tool(ticker_symbol: str) -> str:
     return f"DataFrame with analysis has been saved to {pickle_filename}."
 
 
-def hum_stock_analyzer_tool(ticker_symbol: str) -> str:
-    """Returns the name of the pickled pandas dataframe, with the results of the techical indicators."""
-    df = fetch_stock_data(ticker_symbol)
-    df_with_analysis = analyze_stock(df)
+def hum_stock_analyzer_tool(ticker_symbol: str) -> StockDataTech:
+    """Returns human readable dataframe, with the results of the techical indicators."""
+    (info, history_df, recdtn_df) = fetch_stock_data(ticker_symbol)
+    df_with_analysis = analyze_stock(history_df)
 
     columns_to_display = ['Close', 'SMA_50',
                           'SMA_200', 'MACD_12_26_9', 'ADX_14', 'RSI_14']
     existing_columns = [
         col for col in columns_to_display if col in df_with_analysis.columns]
-    table = tabulate(df_with_analysis[existing_columns].tail(
+    ta_table = tabulate(df_with_analysis[existing_columns].tail(
         10), headers='keys', tablefmt='psql', showindex=True)
-    print(table)
-    return table
+    rec_table = tabulate(recdtn_df.tail(10), headers='keys',
+                         tablefmt='psql', showindex=True)
+    return StockDataTech(info, ta_table+'\n'+rec_table)

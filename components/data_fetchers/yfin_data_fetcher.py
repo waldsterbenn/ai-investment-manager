@@ -1,11 +1,9 @@
-from components.data_acq_layer import DataFetcher
-import yfinance as yf
-import pandas as pd
+from components.data_acq_layer import DataFetcher, StockDataTech
+from tools.tecnical_data_tools import fu_stock_analyzer_tool, hum_stock_analyzer_tool
 
 
 class YFinanceDataFetcher(DataFetcher):
-    def fetch_data(self, ticker_symbol: str) -> pd.DataFrame:
-        stock = yf.Ticker(ticker_symbol)
-        hist = stock.history(period="1y")  # Fetch 1 year of historical data
-        # TODO: use the tools we already have
-        return hist
+    def fetch_data(self, ticker_symbol: str) -> StockDataTech:
+
+        data_table = hum_stock_analyzer_tool(ticker_symbol)
+        return data_table

@@ -1,24 +1,33 @@
+from typing import Dict
 import pandas as pd
 from analysts.fin_statement_analyst import FinancialAnalyst
 from analysts.techical_analyst import TechnicalAnalyst
 import logging
 import logging.config
 
+from components.data_acq_layer import StockDataFin, StockDataTech
+from tools.llm_config_factory import SupportedModels
+
 # Load the logging configuration
-logging.config.fileConfig('logging.config')
+logging.config.fileConfig('./config/logging.config')
 
 # Get the logger specified in the configuration file
-log = logging.getLogger('simpleLogger')
+log = logging.getLogger('sampleLogger')
 
 
 class TechnicalDataAnalyst:
-    def analyze(self, data: pd.DataFrame) -> dict:
+    def __init__(self, llm_model_to_use: SupportedModels = SupportedModels.llama3_8b):
+        self.llm_model_to_use = llm_model_to_use
+
+    def analyze(self, data: Dict[str, StockDataTech]) -> Dict[str, str]:
         # Analyze trends, momentum, volatility, etc.
-        return TechnicalAnalyst().analyse_technicals(data)
+        return TechnicalAnalyst(self.llm_model_to_use).analyse_technicals(data)
 
 
 class FinancialStatementAnalyst:
+    def __init__(self, llm_model_to_use: SupportedModels = SupportedModels.llama3_8b):
+        self.llm_model_to_use = llm_model_to_use
 
-    def analyze(self, data: dict) -> dict:
+    def analyze(self, data: Dict[str, StockDataFin]) -> Dict[str, str]:
         # Analyze profitability, growth, risks, etc.
-        return FinancialAnalyst().analyse_financials(data)
+        return FinancialAnalyst(self.llm_model_to_use).analyse_financials(data)
