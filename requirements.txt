@@ -9,7 +9,3 @@ llama-index-llms-ollama
 
 sec-edgar-downloader
 beautifulsoup4
-
-
-sec-edgar-api
-sec-cik-mapper
