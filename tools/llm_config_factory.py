@@ -1,10 +1,18 @@
 from enum import Enum
+from typing import Dict
 
 
 class LlmModelConfig:
     def __init__(self, name, context_window):
         self.name = name
         self.context_window = context_window
+
+
+class LlmModelType(Enum):
+    default = 0
+    techical = 1
+    finanical = 2
+    advisory = 3
 
 
 class SupportedModels(Enum):
@@ -21,6 +29,7 @@ class SupportedModels(Enum):
     phi3_medium = 11
     qwen2_7b = 12
     llama3_8b_q8 = 13
+    phi3_3b = 14
 
 
 # Før man kan bruge andre modeller skal man hente dem via "ollama pull <modelname>"
@@ -33,19 +42,31 @@ llm_models_config = {
     SupportedModels.wizardLm2_7b:  LlmModelConfig("wizardlm2:7b", 8192),
 
     # https://github.com/meta-llama/llama3/blob/main/MODEL_CARD.md
-    SupportedModels.llama3_8b:  LlmModelConfig("llama3", 8192),  # this is q4
+    # this is q4 default
+    SupportedModels.llama3_8b:  LlmModelConfig("llama3", 8192),
     SupportedModels.llama3_8b_q8:  LlmModelConfig("llama3:8b-instruct-q8_0", 8192),
     SupportedModels.llama3_70b:  LlmModelConfig("llama3:70b-instruct-q4_K_M", 8192),
     SupportedModels.llama3_gradient:  LlmModelConfig("llama3-gradient:8b-instruct-1048k-q6_K", 32000),
     SupportedModels.phi3_medium:  LlmModelConfig("phi3:14b", 32000),
-    # this is q4
+    SupportedModels.phi3_3b:  LlmModelConfig("phi3", 32000),  # q4 default
+
+    # this is q4 default
     SupportedModels.qwen2_7b:  LlmModelConfig("qwen2", 128000),
 }
 
 
 class LlmConfigFactory:
-    def __init__(self, llm_model_type: SupportedModels, prompt_token_length: int = 0):
-        self.llm_model = llm_models_config[llm_model_type]
-        self.llm_model_name = llm_models_config[llm_model_type].name
-        self.llm_model_context_window_size = llm_models_config[llm_model_type].context_window - \
-            prompt_token_length
+    def __init__(self, llm_model_config: Dict[str, str]):
+        self.llm_model_config = llm_model_config
+
+    def getModel(self, modelType: LlmModelType) -> LlmModelConfig:
+        if (modelType == LlmModelType.techical):
+            new_var = self.llm_model_config["llm_model_techical"]
+            new_var1 = SupportedModels[str(new_var).lower()]
+            new_var2 = llm_models_config[new_var1]
+            return new_var2
+        if (modelType == LlmModelType.finanical):
+            return SupportedModels[str(self.llm_model_config["llm_model_financial"]).lower()]
+        if (modelType == LlmModelType.advisory):
+            return SupportedModels[str(self.llm_model_config["llm_model_advisor"]).lower()]
+        raise Exception("Invalid model type")

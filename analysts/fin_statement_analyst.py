@@ -16,7 +16,7 @@
 from typing import Dict
 from llama_index.llms.ollama import Ollama
 from components.data_acq_layer import StockDataFin
-from tools.llm_config_factory import LlmConfigFactory, SupportedModels
+from tools.llm_config_factory import LlmModelConfig
 import logging
 import logging.config
 
@@ -29,22 +29,21 @@ log = logging.getLogger('sampleLogger')
 
 class FinancialAnalyst:
 
-    def __init__(self, llm_model_to_use: SupportedModels) -> None:
+    def __init__(self, llm_model_to_use: LlmModelConfig) -> None:
         self.llm_model_to_use = llm_model_to_use
-        self.llm_temperature = 0.3
+        self.llm_temperature = 0.2
 
     def analyse_financials(self, data: Dict[str, StockDataFin], ticker_symbol: str) -> Dict[str, str]:
-        num_prompt_tokens = 500
-        llm_config = LlmConfigFactory(self.llm_model_to_use, num_prompt_tokens)
+
         log.info(
-            f"Financial statement analysis LLM: {llm_config.llm_model_name}. Context Window: {llm_config.llm_model_context_window_size}. Temperature: {self.llm_temperature}")
+            f"Financial statement analysis LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
 
         ollama_client = Ollama(
-            model=llm_config.llm_model_name,
+            model=self.llm_model_to_use.name,
             request_timeout=15000.0,
             temperature=self.llm_temperature,
             stream=False,
-            context_window=llm_config.llm_model_context_window_size
+            context_window=self.llm_model_to_use.context_window
         )
 
         user_prompt = f"""
@@ -52,7 +51,7 @@ class FinancialAnalyst:
                     Analyse this financial statement for the stock: {ticker_symbol}.
                     Be concrete and precise. Avoid generic answers and disclaimers.
                     
-                    Make a report in Markdown format containing:
+                    Make a concise report in Markdown format containing:
                     - Profitability.
                     - Growth.
                     - Upside and downside risk.
@@ -66,4 +65,4 @@ class FinancialAnalyst:
         log.info(f"LLM analysing query. Prompt {len(user_prompt)} chars.")
         ollama_completion = ollama_client.complete(user_prompt)
         report_text = ollama_completion.text
-        return {"financial_report": report_text}
+        return {"financial_report": report_text.strip()}

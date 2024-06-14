@@ -5,7 +5,7 @@ import logging
 import logging.config
 
 from components.data_acq_layer import StockDataFin, StockDataTech
-from tools.llm_config_factory import SupportedModels
+from tools.llm_config_factory import LlmModelConfig, SupportedModels
 
 # Load the logging configuration
 logging.config.fileConfig('./config/logging.config')
@@ -24,7 +24,7 @@ class TechnicalDataAnalyst:
 
 
 class FinancialStatementAnalyst:
-    def __init__(self, llm_model_to_use: SupportedModels = SupportedModels.llama3_8b):
+    def __init__(self, llm_model_to_use: LlmModelConfig):
         self.llm_model_to_use = llm_model_to_use
 
     def analyze(self, data: Dict[str, StockDataFin], ticker_symbol: str) -> Dict[str, str]:
