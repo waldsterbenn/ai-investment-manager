@@ -5,6 +5,9 @@ from bs4 import BeautifulSoup
 from sec_cik_mapper import StockMapper
 from components.data_acq_layer import DataFetcher, StockDataFin
 from sec_edgar_downloader import Downloader
+from nltk.corpus import stopwords
+import string
+from nltk.tokenize import word_tokenize
 
 # https://www.sec.gov/include/ticker.txt
 
@@ -36,8 +39,31 @@ class SecEdgarDataFetcher(DataFetcher):
 
         # Parse the HTML content
         soup = BeautifulSoup(contents, "html.parser")
+        for data in soup(['style', 'script', 'code', 'a']):
+            # Remove tags
+            data.decompose()
+
+        # return data by retrieving the tag content
+        strs = soup.stripped_strings
+        text = ' '.join(strs)[:2500]
         # Extract all text and return
-        return soup.get_text()
+        # text = soup.get_text()
+
+        # split into words
+        tokens = word_tokenize(text)
+        # convert to lower case
+        tokens = [w.lower() for w in tokens]
+        # remove punctuation from each word
+        table = str.maketrans('', '', string.punctuation)
+        stripped = [w.translate(table) for w in tokens]
+        # remove remaining tokens that are not alphabetic
+        words = [word for word in stripped if word.isalpha()
+                 or word.isalnum()]
+        # filter out stop words
+        stop_words = set(stopwords.words('english'))
+        words = [w for w in words if not w in stop_words]
+
+        return ''.join(words)
 
     def fetch_data(self, ticker_symbol: str) -> StockDataFin:
 
@@ -47,7 +73,7 @@ class SecEdgarDataFetcher(DataFetcher):
         # Avoid overuse of edgar api, since its rate limit to 10 req/min
         filings = self.load_filings(base_dir)
         if len(filings) != 0:
-            return StockDataFin(SecEdgarDataFetcher.__name__, ticker_symbol, filings)
+            return StockDataFin(SecEdgarDataFetcher.__name__, ticker_symbol, pd.DataFrame(filings))
 
         dl = Downloader("MyCompanyName", "my.email@domain.com", "./data/")
         # 10-K anual reoport
@@ -62,7 +88,7 @@ class SecEdgarDataFetcher(DataFetcher):
         return StockDataFin(SecEdgarDataFetcher.__name__, ticker_symbol, pd.DataFrame(filings))
 
     def load_filings(self, base_dir):
-        filings = []
+        filings = {}
 
         # Iterate through all directories and files under base_dir
         for foldername, subfolders, filenames in os.walk(base_dir):
@@ -70,5 +96,6 @@ class SecEdgarDataFetcher(DataFetcher):
                 if filename == 'full-submission.txt':
                     # Get the full path to the file
                     filepath = os.path.join(foldername, filename)
-                    filings.append(self.strip_html(filepath))
+                    filings[foldername] = {
+                        foldername: self.strip_html(filepath)}
         return filings

@@ -13,6 +13,7 @@ class LlmModelType(Enum):
     techical = 1
     finanical = 2
     advisory = 3
+    healthcheck = 4
 
 
 class SupportedModels(Enum):
@@ -47,8 +48,8 @@ llm_models_config = {
     SupportedModels.llama3_8b_q8:  LlmModelConfig("llama3:8b-instruct-q8_0", 8192),
     SupportedModels.llama3_70b:  LlmModelConfig("llama3:70b-instruct-q4_K_M", 8192),
     SupportedModels.llama3_gradient:  LlmModelConfig("llama3-gradient:8b-instruct-1048k-q6_K", 32000),
-    SupportedModels.phi3_medium:  LlmModelConfig("phi3:14b", 32000),
-    SupportedModels.phi3_3b:  LlmModelConfig("phi3", 32000),  # q4 default
+    SupportedModels.phi3_medium:  LlmModelConfig("phi3:14b", 128000),
+    SupportedModels.phi3_3b:  LlmModelConfig("phi3", 4000),  # q4 default
 
     # this is q4 default
     SupportedModels.qwen2_7b:  LlmModelConfig("qwen2", 128000),
@@ -66,7 +67,9 @@ class LlmConfigFactory:
             new_var2 = llm_models_config[new_var1]
             return new_var2
         if (modelType == LlmModelType.finanical):
-            return SupportedModels[str(self.llm_model_config["llm_model_financial"]).lower()]
+            return llm_models_config[SupportedModels[str(self.llm_model_config["llm_model_financial"]).lower()]]
         if (modelType == LlmModelType.advisory):
-            return SupportedModels[str(self.llm_model_config["llm_model_advisor"]).lower()]
+            return llm_models_config[SupportedModels[str(self.llm_model_config["llm_model_advisor_stock"]).lower()]]
+        if (modelType == LlmModelType.healthcheck):
+            return llm_models_config[SupportedModels[str(self.llm_model_config["llm_model_advisor_healthcheck"]).lower()]]
         raise Exception("Invalid model type")

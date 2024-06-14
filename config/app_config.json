@@ -3,8 +3,9 @@
     "portfolio_tickers": ["IONQ", "NVO", "RTX", "AVAV", "AVGO"],
     "llm_model":
     {
-        "llm_model_techical": "phi3_3b",
+        "llm_model_techical": "qwen2_7b",
         "llm_model_financial": "qwen2_7b",
-        "llm_model_advisor": "qwen2_7b"
+        "llm_model_advisor_stock": "qwen2_7b",
+        "llm_model_advisor_healthcheck": "qwen2_7b"
     }
 }

@@ -38,8 +38,11 @@ def analyze_stock(df):
     :return: DataFrame with analysis results.
     """
     # Calculate Simple Moving Averages
-    df['SMA_50'] = ta.sma(df['Close'], length=50)
-    df['SMA_200'] = ta.sma(df['Close'], length=200)
+    sma50 = ta.sma(df['Close'], length=50)
+    df['SMA_50'] = sma50
+    sma200 = ta.sma(df['Close'], length=200)
+    df['SMA_200'] = sma200
+    df['Golden Cross'] = sma50 > sma200
 
     # Calculate MACD
     macd = ta.macd(df['Close'])
@@ -58,7 +61,7 @@ def analyze_stock(df):
 
     # Calculate RSI
     df['RSI'] = ta.rsi(df['Close'])
-
+    # print(df)
     return df
 
 
@@ -103,12 +106,55 @@ def hum_stock_analyzer_tool(ticker_symbol: str) -> tuple[dict, str]:
     (info, history_df, recdtn_df) = fetch_stock_data(ticker_symbol)
     df_with_analysis = analyze_stock(history_df)
 
-    columns_to_display = ['Close', 'SMA_50',
+    columns_to_display = ['Open', 'High', 'Low', 'Close', 'Volume', 'Golden Cross', 'SMA_50',
                           'SMA_200', 'MACD_12_26_9', 'ADX_14', 'RSI_14']
     existing_columns = [
         col for col in columns_to_display if col in df_with_analysis.columns]
-    ta_table = tabulate(df_with_analysis[existing_columns].tail(
-        10), headers='keys', tablefmt='psql', showindex=True)
-    rec_table = tabulate(recdtn_df.tail(10), headers='keys',
-                         tablefmt='psql', showindex=True)
-    return (info, ta_table+'\n'+rec_table)
+    # ta_table = tabulate(df_with_analysis[existing_columns].tail(
+    #     50), headers='keys', tablefmt='psql', showindex=True)
+    # rec_table = tabulate(recdtn_df, headers='keys',
+    #                      tablefmt='psql', showindex=True)
+
+    df_with_analysis.columns = [
+        f'TechicalData_{col}' for col in df_with_analysis.columns]
+    recdtn_df.columns = [f'AnalystRating_{col}' for col in recdtn_df.columns]
+
+    # Merge DataFrames on index
+    df = pd.concat([df_with_analysis, recdtn_df], axis=1)
+    df = df.dropna(how='all')
+    return (info, df)
+
+
+# def get_financial_numbers(ticker_symbol: str) -> str:
+#     """Returns a dictionary with financial numbers."""
+#     data = yf.Ticker(ticker_symbol)
+
+#     balance = tabulate(data.balance_sheet, headers='keys',
+#                        tablefmt='psql', showindex=True)
+#     fin = tabulate(data.financials, headers='keys',
+#                    tablefmt='psql', showindex=True)
+#     inc = tabulate(data.income_stmt, headers='keys',
+#                    tablefmt='psql', showindex=True)
+#     return '#Balance\n'+balance+'\n\n#Financials\n'+fin+'\n\n#Income statement\n'+inc
+
+def get_financial_numbers(ticker_symbol: str) -> pd.DataFrame:
+    """Returns a dictionary with financial numbers."""
+    data = yf.Ticker(ticker_symbol)
+
+    balance = data.balance_sheet
+    fin = data.financials
+    return fin.dropna(how='all')
+    inc = data.income_stmt
+
+    # Add prefix to DataFrame columns to make them unique and clear
+    balance.columns = [f'Balance_{col}' for col in balance.columns]
+    fin.columns = [f'Financial_{col}' for col in fin.columns]
+    inc.columns = [f'Income_{col}' for col in inc.columns]
+
+    # Merge DataFrames on index
+    df = pd.concat([balance, fin, inc], axis=1)
+
+    # Convert DataFrame to markdown table
+    # md_table = df.to_markdown(index=True)
+
+    return df

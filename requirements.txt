@@ -3,6 +3,7 @@ pandas-ta
 requests
 tabulate
 beautifulsoup4
+nltk
 
 ollama
 llama-index-core

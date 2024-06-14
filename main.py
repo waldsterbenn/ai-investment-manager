@@ -1,10 +1,12 @@
 import json
+import os
 from typing import List
-from advisors.stock_advisor import Advisor
+from advisors.portfolio_advisor import PortfolioAdvisor
+from advisors.stock_advisor import StockAdvisor
 from components.analysis_layer import FinancialStatementAnalyst, TechnicalDataAnalyst
 from components.data_acq_layer import DataFetcher, FMPDataFetcher, FinnhubDataFetcher
 from components.data_fetchers.sec_edgar_fetcher import SecEdgarDataFetcher
-from components.data_fetchers.yfin_data_fetcher import YFinanceDataFetcher
+from components.data_fetchers.yfin_data_fetcher import YFinanceFinDataFetcher, YFinanceTechicalDataFetcher
 from components.report_generator import ReportGenerator
 import logging
 import logging.config
@@ -25,45 +27,46 @@ class InvestmentPortfolioManager:
         self.ta_fetchers: List[DataFetcher] = []
         self.ta_fetchers.append(FMPDataFetcher())
         self.ta_fetchers.append(FinnhubDataFetcher())
-        self.ta_fetchers.append(YFinanceDataFetcher())
+        self.ta_fetchers.append(YFinanceTechicalDataFetcher())
 
         self.technical_analyst = TechnicalDataAnalyst(
             llmConfigFactory.getModel(LlmModelType.techical))
 
         self.fin_fetchers: List[DataFetcher] = []
+        self.fin_fetchers.append(YFinanceFinDataFetcher())
         self.fin_fetchers.append(SecEdgarDataFetcher())
         self.financial_analyst = FinancialStatementAnalyst(
             llmConfigFactory.getModel(LlmModelType.finanical))
 
-        self.advisor = Advisor(
+        self.stock_advisor = StockAdvisor(
             llmConfigFactory.getModel(LlmModelType.advisory))
         self.report_generator = ReportGenerator()
 
     def run(self):
-
+        log.debug(f"Running analysis on {self.ticker_symbol}")
         # Fetch techical data
-        techical_data = {}
+        techical_data = []
         for fetcher in self.ta_fetchers:
             data = fetcher.fetch_data(self.ticker_symbol)
             if (data.info is not None or data.techical_indicators is not None):
-                techical_data[data.fetcher_name] = data
+                techical_data.append(data)
 
         # Analyze data
         technical_analysis = self.technical_analyst.analyze(
             techical_data, self.ticker_symbol)
 
         # Fetch finanical data
-        financial_data = {}
+        financial_data = []
         for fetcher in self.fin_fetchers:
             data = fetcher.fetch_data(self.ticker_symbol)
-            financial_data[data.fetcher_name] = data
+            financial_data.append(data)
 
         # Analyze data
         financial_analysis = self.financial_analyst.analyze(
             financial_data, self.ticker_symbol)
 
         # Provide advice
-        advice = self.advisor.provide_advice(
+        advice = self.stock_advisor.provide_advice(
             technical_analysis, financial_analysis)
 
         # Generate report
@@ -96,3 +99,25 @@ if __name__ == "__main__":
         manager = InvestmentPortfolioManager(
             api_keys, llmConfigFactory, ticker_symbol)
         manager.run()
+
+    files = []
+    for foldername, subfolders, filenames in os.walk('./reports/'):
+        for filename in filenames:
+            # Get the full path to the file
+            files.append(os.path.join(foldername, filename))
+
+    portfolio_advisor = PortfolioAdvisor(
+        llmConfigFactory.getModel(LlmModelType.healthcheck))
+    advice = portfolio_advisor.provide_advice(files)
+    # Join different sections of the report to avoid unwanted spaces in final string
+    report = "\n\n".join([
+        "# Portfolio Advice",
+        str(advice).strip().replace("  ", ""),
+
+    ])
+
+    if not os.path.exists("./reports/"):
+        os.mkdir("./reports/")
+    output_filename = f"./reports/portfolio_advice_report.md"
+    with open(output_filename, "w") as file:
+        file.write(report)

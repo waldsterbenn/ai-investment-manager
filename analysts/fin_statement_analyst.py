@@ -17,6 +17,7 @@ from typing import Dict
 from llama_index.llms.ollama import Ollama
 from components.data_acq_layer import StockDataFin
 from tools.llm_config_factory import LlmModelConfig
+import nltk
 import logging
 import logging.config
 
@@ -33,7 +34,7 @@ class FinancialAnalyst:
         self.llm_model_to_use = llm_model_to_use
         self.llm_temperature = 0.2
 
-    def analyse_financials(self, data: Dict[str, StockDataFin], ticker_symbol: str) -> Dict[str, str]:
+    def analyse_financials(self, data: list[StockDataFin], ticker_symbol: str) -> Dict[str, str]:
 
         log.info(
             f"Financial statement analysis LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
@@ -46,22 +47,59 @@ class FinancialAnalyst:
             context_window=self.llm_model_to_use.context_window
         )
 
+        # user_prompt = f"""
+        #             You are an expert financial analyst.
+        #             Analyse this financial statement for the stock: {ticker_symbol}.
+        #             Be concrete and precise. Avoid generic answers and disclaimers.
+
+        #             Make a concise report in Markdown format containing:
+        #             - Profitability.
+        #             - Growth.
+        #             - Upside and downside risk.
+        #             - Market and competition.
+
+        #             Financial Statement data:
+        #             ---
+        #             {data}
+        #             ---
+        #         """
+
+        # data_inject = ""
+        # for value in data:
+        #     data_inject += value.fetcher_name + ":\n"+value.info + \
+        #         "\n"+value.financial_indicators.to_markdown(index=True)
+        data_inject = ""
+        for value in data:
+            if value.fetcher_name is not None and (value.info is not None or value.financial_indicators is not None):
+                data_element = f"{value.fetcher_name}:\n"
+                if value.info is not None:
+                    data_element += f"{value.info}\n"
+                if value.financial_indicators is not None:
+                    data_element += f"{value.financial_indicators.head(50).to_markdown(index=True)}\n"
+
+                # ollama_completion = ollama_client.complete(
+                #     "extract only the important information in this text\n\n" + data_element)
+                # data_inject += ollama_completion.text
+                data_inject += data_element.replace(
+                    ' ', '').replace('\n', '').replace('nan', '') + '\n\n'
+
         user_prompt = f"""
-                    You are an expert financial analyst.
-                    Analyse this financial statement for the stock: {ticker_symbol}.
-                    Be concrete and precise. Avoid generic answers and disclaimers.
-                    
-                    Make a concise report in Markdown format containing:
-                    - Profitability.
-                    - Growth.
-                    - Upside and downside risk.
-                    - Market and competition.
-        
-                    Financial Statement data:
-                    ---
-                    {data} 
-                    ---
-                """
+            You are an expert financial analyst.
+            Analyse this financial statement for the stock: {ticker_symbol}.
+            Be concrete and precise. Avoid generic answers and disclaimers.
+
+            Make a concise report in Markdown format containing:
+            - Profitability.
+            - Growth.
+            - Upside and downside risk.
+            - Market and competition.
+
+            Financial Statement data:
+            ---
+            {data_inject}
+            ---
+            """
+
         log.info(f"LLM analysing query. Prompt {len(user_prompt)} chars.")
         ollama_completion = ollama_client.complete(user_prompt)
         report_text = ollama_completion.text

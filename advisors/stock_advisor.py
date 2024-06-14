@@ -25,7 +25,7 @@ logging.config.fileConfig('./config/logging.config')
 log = logging.getLogger('sampleLogger')
 
 
-class Advisor:
+class StockAdvisor:
     def __init__(self, llm_model_to_use: LlmModelConfig) -> None:
         self.llm_model_to_use = llm_model_to_use
         self.llm_temperature = 0.3

@@ -31,7 +31,7 @@ class TechnicalAnalyst:
         self.llm_model_to_use = llm_model_to_use
         self.llm_temperature = 0.2
 
-    def analyse_technicals(self, data: Dict[str, StockDataTech], ticker_symbol: str) -> Dict[str, str]:
+    def analyse_technicals(self, data: list[StockDataTech], ticker_symbol: str) -> Dict[str, str]:
 
         log.info(
             f"Techical analysis LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
@@ -43,6 +43,21 @@ class TechnicalAnalyst:
             stream=False,
             context_window=self.llm_model_to_use.context_window
         )
+
+        data_inject = ""
+        for value in data:
+            if value.fetcher_name is not None and (value.info is not None or value.techical_indicators is not None):
+                data_element = f"{value.fetcher_name}:\n"
+                if value.info is not None:
+                    data_element += f"{value.info}\n"
+                if value.techical_indicators is not None:
+                    data_element += f"{value.techical_indicators.head(50).to_markdown(index=True)}\n"
+
+                # ollama_completion = ollama_client.complete(
+                #     "extract only the important information in this text\n\n" + data_element)
+                # data_inject += ollama_completion.text
+                data_inject += data_element.replace(
+                    ' ', '').replace('\n', '').replace('nan', '') + '\n\n'
 
         user_prompt = f"""
                     You are an expert financial analyst. Analyse these technical data for for the stock: {ticker_symbol}.
@@ -56,7 +71,7 @@ class TechnicalAnalyst:
     
                     Techical Data:
                     ---
-                    {data} 
+                    {data_inject} 
                     ---
                 """
         log.info(f"LLM analysing query. Prompt {len(user_prompt)} chars.")
