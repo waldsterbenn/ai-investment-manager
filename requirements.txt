@@ -1,11 +1,14 @@
-ollama
-yfinance
 pandas
 pandas-ta
 requests
 tabulate
+beautifulsoup4
+
+ollama
 llama-index-core
 llama-index-llms-ollama
 
 sec-edgar-downloader
-beautifulsoup4
+sec-cik-mapper
+
+yfinance
