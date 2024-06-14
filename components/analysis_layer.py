@@ -1,5 +1,4 @@
 from typing import Dict
-import pandas as pd
 from analysts.fin_statement_analyst import FinancialAnalyst
 from analysts.techical_analyst import TechnicalAnalyst
 import logging
@@ -19,15 +18,15 @@ class TechnicalDataAnalyst:
     def __init__(self, llm_model_to_use: SupportedModels = SupportedModels.llama3_8b):
         self.llm_model_to_use = llm_model_to_use
 
-    def analyze(self, data: Dict[str, StockDataTech]) -> Dict[str, str]:
+    def analyze(self, data: Dict[str, StockDataTech], ticker_symbol: str) -> Dict[str, str]:
         # Analyze trends, momentum, volatility, etc.
-        return TechnicalAnalyst(self.llm_model_to_use).analyse_technicals(data)
+        return TechnicalAnalyst(self.llm_model_to_use).analyse_technicals(data, ticker_symbol)
 
 
 class FinancialStatementAnalyst:
     def __init__(self, llm_model_to_use: SupportedModels = SupportedModels.llama3_8b):
         self.llm_model_to_use = llm_model_to_use
 
-    def analyze(self, data: Dict[str, StockDataFin]) -> Dict[str, str]:
+    def analyze(self, data: Dict[str, StockDataFin], ticker_symbol: str) -> Dict[str, str]:
         # Analyze profitability, growth, risks, etc.
-        return FinancialAnalyst(self.llm_model_to_use).analyse_financials(data)
+        return FinancialAnalyst(self.llm_model_to_use).analyse_financials(data, ticker_symbol)

@@ -32,7 +32,7 @@ class TechnicalAnalyst:
         self.llm_model_to_use = llm_model_to_use
         self.llm_temperature = 0.3
 
-    def analyse_technicals(self, data: Dict[str, StockDataTech]) -> Dict[str, str]:
+    def analyse_technicals(self, data: Dict[str, StockDataTech], ticker_symbol: str) -> Dict[str, str]:
 
         num_prompt_tokens = 500
         llm_config = LlmConfigFactory(self.llm_model_to_use, num_prompt_tokens)
@@ -48,7 +48,8 @@ class TechnicalAnalyst:
         )
 
         user_prompt = f"""
-                    You are an expert financial analyst. Analyse these technical data for a stock.
+                    You are an expert financial analyst. Analyse these technical data for for the stock: {ticker_symbol}.
+                    Be concrete and precise. Avoid generic answers.
                     Analyze trends, momentum, volatility, etc.
                     Make a report in Markdown format.
                     

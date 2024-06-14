@@ -47,7 +47,7 @@ class SecEdgarDataFetcher(DataFetcher):
         # Avoid overuse of edgar api, since its rate limit to 10 req/min
         filings = self.load_filings(base_dir)
         if len(filings) != 0:
-            return StockDataFin(ticker_symbol, filings)
+            return StockDataFin(SecEdgarDataFetcher.__name__, ticker_symbol, filings)
 
         dl = Downloader("MyCompanyName", "my.email@domain.com", "./data/")
         # 10-K anual reoport
@@ -59,7 +59,7 @@ class SecEdgarDataFetcher(DataFetcher):
         filings = self.load_filings(base_dir)
 
         # filepath = '.\\sec-edgar-filings\\NVO\\6-K\\0001171843-24-002400\\full-submission.txt'
-        return StockDataFin(ticker_symbol, pd.DataFrame(filings))
+        return StockDataFin(SecEdgarDataFetcher.__name__, ticker_symbol, pd.DataFrame(filings))
 
     def load_filings(self, base_dir):
         filings = []

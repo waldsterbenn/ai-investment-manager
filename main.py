@@ -1,9 +1,10 @@
 from enum import Enum
 import json
 import string
+from typing import List
 from advisors.stock_advisor import Advisor
 from components.analysis_layer import FinancialStatementAnalyst, TechnicalDataAnalyst
-from components.data_acq_layer import FMPDataFetcher, FinnhubDataFetcher, StockDataFin, StockDataTech
+from components.data_acq_layer import DataFetcher, FMPDataFetcher, FinnhubDataFetcher, StockDataFin, StockDataTech
 from components.data_fetchers.sec_edgar_fetcher import SecEdgarDataFetcher
 from components.data_fetchers.yfin_data_fetcher import YFinanceDataFetcher
 from components.report_generator import ReportGenerator
@@ -22,32 +23,43 @@ log = logging.getLogger('sampleLogger')
 class InvestmentPortfolioManager:
     def __init__(self, apiKeys: dict, llm_model_to_use, symbol: str):
         self.ticker_symbol = symbol
-        self.sec_fetcher = SecEdgarDataFetcher()
-        self.fmp_fetcher = FMPDataFetcher()
-        self.finnhub_fetcher = FinnhubDataFetcher()
-        self.yfinance_fetcher = YFinanceDataFetcher()
+
+        self.ta_fetchers: List[DataFetcher] = []
+        self.ta_fetchers.append(FMPDataFetcher())
+        self.ta_fetchers.append(FinnhubDataFetcher())
+        self.ta_fetchers.append(YFinanceDataFetcher())
+
         self.technical_analyst = TechnicalDataAnalyst(llm_model_to_use)
+
+        self.fin_fetchers: List[DataFetcher] = []
+        self.fin_fetchers.append(SecEdgarDataFetcher())
         self.financial_analyst = FinancialStatementAnalyst(llm_model_to_use)
+
         self.advisor = Advisor(llm_model_to_use)
         self.report_generator = ReportGenerator()
 
     def run(self):
-        # Fetch data
-        sec_data: StockDataFin = self.sec_fetcher.fetch_data(
-            self.ticker_symbol)
-        fmp_data = self.fmp_fetcher.fetch_data(self.ticker_symbol)
-        finnhub_data = self.finnhub_fetcher.fetch_data(self.ticker_symbol)
-        yfinance_data: StockDataTech = self.yfinance_fetcher.fetch_data(
-            self.ticker_symbol)
+
+        # Fetch techical data
+        techical_data = {}
+        for fetcher in self.ta_fetchers:
+            data = fetcher.fetch_data(self.ticker_symbol)
+            if (data.info is not None or data.techical_indicators is not None):
+                techical_data[data.fetcher_name] = data
 
         # Analyze data
-        techical_data = {}
-        techical_data["yfinance"] = yfinance_data
-        technical_analysis = self.technical_analyst.analyze(techical_data)
+        technical_analysis = self.technical_analyst.analyze(
+            techical_data, self.ticker_symbol)
 
+        # Fetch finanical data
         financial_data = {}
-        financial_data["sec"] = sec_data
-        financial_analysis = self.financial_analyst.analyze(financial_data)
+        for fetcher in self.fin_fetchers:
+            data = fetcher.fetch_data(self.ticker_symbol)
+            financial_data[data.fetcher_name] = data
+
+        # Analyze data
+        financial_analysis = self.financial_analyst.analyze(
+            financial_data, self.ticker_symbol)
 
         # Provide advice
         advice = self.advisor.provide_advice(
@@ -78,8 +90,7 @@ if __name__ == "__main__":
 
     llm_model_to_use = SupportedModels[str(app_config["llm_model"]).lower()]
 
-    ticker_symbol = "NVO"
-    ticker_symbol = "NVDA"
-    manager = InvestmentPortfolioManager(
-        api_keys, llm_model_to_use, ticker_symbol)
-    manager.run()
+    for ticker_symbol in app_config["portfolio_tickers"]:
+        manager = InvestmentPortfolioManager(
+            api_keys, llm_model_to_use, ticker_symbol)
+        manager.run()

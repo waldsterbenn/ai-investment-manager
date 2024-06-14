@@ -5,5 +5,5 @@ from tools.tecnical_data_tools import fu_stock_analyzer_tool, hum_stock_analyzer
 class YFinanceDataFetcher(DataFetcher):
     def fetch_data(self, ticker_symbol: str) -> StockDataTech:
 
-        data_table = hum_stock_analyzer_tool(ticker_symbol)
-        return data_table
+        (info, data_table) = hum_stock_analyzer_tool(ticker_symbol)
+        return StockDataTech(YFinanceDataFetcher.__name__, info, data_table)

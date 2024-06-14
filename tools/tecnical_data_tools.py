@@ -99,7 +99,7 @@ def fu_stock_analyzer_tool(ticker_symbol: str) -> str:
     return f"DataFrame with analysis has been saved to {pickle_filename}."
 
 
-def hum_stock_analyzer_tool(ticker_symbol: str) -> StockDataTech:
+def hum_stock_analyzer_tool(ticker_symbol: str) -> tuple[dict, str]:
     """Returns human readable dataframe, with the results of the techical indicators."""
     (info, history_df, recdtn_df) = fetch_stock_data(ticker_symbol)
     df_with_analysis = analyze_stock(history_df)
@@ -112,4 +112,4 @@ def hum_stock_analyzer_tool(ticker_symbol: str) -> StockDataTech:
         10), headers='keys', tablefmt='psql', showindex=True)
     rec_table = tabulate(recdtn_df.tail(10), headers='keys',
                          tablefmt='psql', showindex=True)
-    return StockDataTech(info, ta_table+'\n'+rec_table)
+    return (info, ta_table+'\n'+rec_table)

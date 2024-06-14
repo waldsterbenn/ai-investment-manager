@@ -35,7 +35,7 @@ class FinancialAnalyst:
         self.llm_model_to_use = llm_model_to_use
         self.llm_temperature = 0.3
 
-    def analyse_financials(self, data: Dict[str, StockDataFin]) -> Dict[str, str]:
+    def analyse_financials(self, data: Dict[str, StockDataFin], ticker_symbol: str) -> Dict[str, str]:
         num_prompt_tokens = 500
         llm_config = LlmConfigFactory(self.llm_model_to_use, num_prompt_tokens)
         log.info(
@@ -51,7 +51,8 @@ class FinancialAnalyst:
 
         user_prompt = f"""
                     You are an expert financial analyst.
-                    Analyse this financial statement for a stock.
+                    Analyse this financial statement for the stock: {ticker_symbol}.
+                    Be concrete and precise. Avoid generic answers.
                     
                     Make a report in Markdown format containing:
                     - Profitability.
