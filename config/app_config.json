@@ -1,6 +1,6 @@
 {
     
-    "portfolio_tickers": ["IONQ", "NVO", "RTX", "AVAV", "AVGO"],
+    "portfolio_tickers": ["IONQ", "VECO", "LRCX", "NVO", "RTX", "AVAV", "AVGO", "MSFT", "MRNA", "GOOG", "AMD", "DELL"],
     "llm_model":
     {
         "llm_model_techical": "qwen2_7b",

@@ -96,13 +96,19 @@ if __name__ == "__main__":
     llmConfigFactory = LlmConfigFactory(llm_model_config)
 
     for ticker_symbol in app_config["portfolio_tickers"]:
-        manager = InvestmentPortfolioManager(
-            api_keys, llmConfigFactory, ticker_symbol)
-        manager.run()
+        if not os.path.exists("./reports/"):
+            os.mkdir("./reports/")
+        fn = f"./reports/{ticker_symbol}_report.md"
+        if not os.path.exists(fn):
+            manager = InvestmentPortfolioManager(
+                api_keys, llmConfigFactory, ticker_symbol)
+            manager.run()
 
     files = []
     for foldername, subfolders, filenames in os.walk('./reports/'):
         for filename in filenames:
+            if filename == "portfolio_advice_report.md":
+                continue
             # Get the full path to the file
             files.append(os.path.join(foldername, filename))
 
