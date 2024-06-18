@@ -38,7 +38,7 @@ class StockInformationProcessor:
         self.stock_advisor = StockAdvisor(llm_advisor)
 
     # Run techical analysis and gather fundamental data. Make advice for the stock
-    def process(self, ticker_symbol: str):
+    def process(self, ticker_symbol: str) -> str:
         self.ticker_symbol = ticker_symbol
         log.info(f"Running analysis on {self.ticker_symbol}")
 

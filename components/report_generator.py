@@ -22,7 +22,8 @@ class ReportGenerator:
             "# Advice",
             stock_advice.strip().replace("  ", ""),
             "# Details",
-            "> Report generated at {0}".format(time.ctime(report_time)),
+            f"> Ticker code: {ticker_symbol}"
+            f"> Report generated at {time.ctime(report_time)}",
         ])
 
         self.ensure_report_dir()

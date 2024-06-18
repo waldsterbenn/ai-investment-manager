@@ -30,7 +30,7 @@ class StockAdvisor:
         self.llm_model_to_use = llm_model_to_use
         self.llm_temperature = 0.3
 
-    def provide_advice(self, technical_analysis: Dict[str, str], financial_analysis: Dict[str, str]) -> dict:
+    def provide_advice(self, technical_analysis: Dict[str, str], financial_analysis: Dict[str, str]) -> str:
         # Combine analyses and provide investment advice
         log.info(
             f"Advisor analysis LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
@@ -70,4 +70,4 @@ class StockAdvisor:
         log.info(f"LLM analysing query. Prompt {len(user_prompt)} chars.")
         ollama_completion = ollama_client.complete(user_prompt)
         report_text = ollama_completion.text
-        return {"advisory_report": report_text.strip()}
+        return report_text.strip()
