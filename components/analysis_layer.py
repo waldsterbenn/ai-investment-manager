@@ -5,7 +5,7 @@ import logging
 import logging.config
 
 from components.data_acq_layer import StockDataFin, StockDataTech
-from tools.llm_config_factory import LlmModelConfig, SupportedModels
+from tools.llm_config_factory import LlmModelConfig
 
 # Load the logging configuration
 logging.config.fileConfig('./config/logging.config')
