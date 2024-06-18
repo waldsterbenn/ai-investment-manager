@@ -12,11 +12,15 @@ log = logging.getLogger('sampleLogger')
 
 
 class PortfolioAdvisor:
-    def __init__(self, llm_model_to_use: LlmModelConfig) -> None:
+    def __init__(self, llm_model_to_use: LlmModelConfig, dry_run: bool = False) -> None:
         self.llm_model_to_use = llm_model_to_use
         self.llm_temperature = 0.3
+        self.dry_run = dry_run
 
     def provide_advice(self, report_files: list[str]) -> str:
+        if self.dry_run:
+            return "This is a report containing advice on the portfolio."
+
         # Combine analyses and provide investment advice
         log.info(
             f"Advisor analysis LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
@@ -76,7 +80,7 @@ class PortfolioAdvisor:
         ollama_completion = ollama_client.complete(user_prompt)
         return ollama_completion.text
 
-    def asses_portfolio(self, portfolio_advice):
+    def asses_portfolio(self, portfolio_advice) -> str:
         # Assess the quality of the portfolio.
 
         log.info(

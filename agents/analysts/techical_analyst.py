@@ -27,15 +27,18 @@ log = logging.getLogger('sampleLogger')
 
 class TechnicalAnalyst:
 
-    def __init__(self, llm_model_to_use: LlmModelConfig) -> None:
+    def __init__(self, llm_model_to_use: LlmModelConfig, dry_run: bool = False) -> None:
         self.llm_model_to_use = llm_model_to_use
         self.llm_temperature = 0.2
+        self.dry_run = dry_run
 
     def analyse_technicals(self, data: list[StockDataTech], ticker_symbol: str) -> Dict[str, str]:
 
+        if self.dry_run:
+            {"techical_report": "This is a report containing Technical Analysis of the stock."}
+
         log.info(
             f"Techical analysis LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
-        # return "Techical analysis"
         ollama_client = Ollama(
             model=self.llm_model_to_use.name,
             request_timeout=15000.0,

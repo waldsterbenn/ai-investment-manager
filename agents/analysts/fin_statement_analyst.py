@@ -29,13 +29,16 @@ log = logging.getLogger('sampleLogger')
 
 class FinancialAnalyst:
 
-    def __init__(self, llm_model_to_use: LlmModelConfig) -> None:
+    def __init__(self, llm_model_to_use: LlmModelConfig, dry_run: bool = False) -> None:
         self.llm_model_to_use = llm_model_to_use
         self.llm_temperature = 0.2
+        self.dry_run = dry_run
 
     def analyse_financials(self, data: list[StockDataFin], ticker_symbol: str) -> Dict[str, str]:
 
-        # return "Financial analysis"
+        if self.dry_run:
+            {"financial_report": "This is a report containing Financial Analysis of the stock."}
+
         log.info(
             f"Financial statement analysis LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
 

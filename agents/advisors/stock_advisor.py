@@ -26,11 +26,15 @@ log = logging.getLogger('sampleLogger')
 
 
 class StockAdvisor:
-    def __init__(self, llm_model_to_use: LlmModelConfig) -> None:
+    def __init__(self, llm_model_to_use: LlmModelConfig, dry_run: bool = False) -> None:
         self.llm_model_to_use = llm_model_to_use
         self.llm_temperature = 0.3
+        self.dry_run = dry_run
 
     def provide_advice(self, technical_analysis: Dict[str, str], financial_analysis: Dict[str, str]) -> str:
+        if self.dry_run:
+            return "This is a report containing advice on the stock."
+
         # Combine analyses and provide investment advice
         log.info(
             f"Advisor analysis LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
