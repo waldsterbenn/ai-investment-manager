@@ -1,5 +1,5 @@
 from typing import List
-from advisors.stock_advisor import StockAdvisor
+from agents.advisors.stock_advisor import StockAdvisor
 from components.analysis_layer import FinancialStatementAnalyst, TechnicalDataAnalyst
 from components.data_acq_layer import DataFetcher, FMPDataFetcher, FinnhubDataFetcher
 from components.data_fetchers.sec_edgar_fetcher import SecEdgarDataFetcher

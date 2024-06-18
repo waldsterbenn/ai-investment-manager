@@ -1,5 +1,3 @@
-import os
-from typing import Dict
 from llama_index.llms.ollama import Ollama
 import logging
 import logging.config
@@ -60,12 +58,12 @@ class PortfolioAdvisor:
         report_text = ollama_completion.text
         return report_text.strip()
 
-    def summarize_report(self, report_file: str, ollama_client: Ollama):
+    def summarize_report(self, report_file: str, ollama_client: Ollama) -> str:
         text = ""
         with open(report_file) as f:
             text = ''.join(f.readlines())
         if text == "":
-            return
+            return ""
 
         user_prompt = f"""
                     Summarize this but make sure to keep essential information. Especially buy/hold/sell rating.

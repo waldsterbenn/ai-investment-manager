@@ -1,6 +1,6 @@
 import json
 import os
-from advisors.portfolio_advisor import PortfolioAdvisor
+from agents.advisors.portfolio_advisor import PortfolioAdvisor
 from components.report_generator import ReportGenerator
 import logging
 import logging.config

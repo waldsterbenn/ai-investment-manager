@@ -35,7 +35,7 @@ class TechnicalAnalyst:
 
         log.info(
             f"Techical analysis LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
-
+        # return "Techical analysis"
         ollama_client = Ollama(
             model=self.llm_model_to_use.name,
             request_timeout=15000.0,
@@ -54,11 +54,7 @@ class TechnicalAnalyst:
                     for table in value.techical_indicators:
                         data_element += f"{table.to_markdown(index=True)}\n"
 
-                # ollama_completion = ollama_client.complete(
-                #     "extract only the important information in this text\n\n" + data_element)
-                # data_inject += ollama_completion.text
                 data_inject += data_element
-                # data_inject += data_element.replace(' ', '').replace('\n', '').replace('nan', '').replace('NaN', '') + '\n\n'
 
         user_prompt = f"""
                     You are an expert financial analyst. Analyse these technical data for for the stock: {ticker_symbol}.

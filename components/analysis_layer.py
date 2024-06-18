@@ -1,6 +1,6 @@
 from typing import Dict
-from analysts.fin_statement_analyst import FinancialAnalyst
-from analysts.techical_analyst import TechnicalAnalyst
+from agents.analysts.fin_statement_analyst import FinancialAnalyst
+from agents.analysts.techical_analyst import TechnicalAnalyst
 import logging
 import logging.config
 
@@ -15,7 +15,7 @@ log = logging.getLogger('sampleLogger')
 
 
 class TechnicalDataAnalyst:
-    def __init__(self, llm_model_to_use: SupportedModels = SupportedModels.llama3_8b):
+    def __init__(self, llm_model_to_use: LlmModelConfig):
         self.llm_model_to_use = llm_model_to_use
 
     def analyze(self, data: list[StockDataTech], ticker_symbol: str) -> Dict[str, str]:

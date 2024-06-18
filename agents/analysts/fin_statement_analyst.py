@@ -17,7 +17,6 @@ from typing import Dict
 from llama_index.llms.ollama import Ollama
 from components.data_acq_layer import StockDataFin
 from tools.llm_config_factory import LlmModelConfig
-import nltk
 import logging
 import logging.config
 
@@ -36,6 +35,7 @@ class FinancialAnalyst:
 
     def analyse_financials(self, data: list[StockDataFin], ticker_symbol: str) -> Dict[str, str]:
 
+        # return "Financial analysis"
         log.info(
             f"Financial statement analysis LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
 
@@ -47,27 +47,6 @@ class FinancialAnalyst:
             context_window=self.llm_model_to_use.context_window
         )
 
-        # user_prompt = f"""
-        #             You are an expert financial analyst.
-        #             Analyse this financial statement for the stock: {ticker_symbol}.
-        #             Be concrete and precise. Avoid generic answers and disclaimers.
-
-        #             Make a concise report in Markdown format containing:
-        #             - Profitability.
-        #             - Growth.
-        #             - Upside and downside risk.
-        #             - Market and competition.
-
-        #             Financial Statement data:
-        #             ---
-        #             {data}
-        #             ---
-        #         """
-
-        # data_inject = ""
-        # for value in data:
-        #     data_inject += value.fetcher_name + ":\n"+value.info + \
-        #         "\n"+value.financial_indicators.to_markdown(index=True)
         data_inject = ""
         for value in data:
             if value.fetcher_name is not None and (value.info is not None or value.financial_indicators is not None):
@@ -78,9 +57,6 @@ class FinancialAnalyst:
                     for dataframe in value.financial_indicators:
                         data_element += f"{dataframe.head(50).to_markdown(index=True)}\n"
 
-                # ollama_completion = ollama_client.complete(
-                #     "extract only the important information in this text\n\n" + data_element)
-                # data_inject += ollama_completion.text
                 data_inject += data_element.replace(
                     ' ', '').replace('\n', '').replace('nan', '') + '\n\n'
 

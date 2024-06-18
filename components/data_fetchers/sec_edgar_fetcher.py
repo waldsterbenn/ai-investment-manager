@@ -67,13 +67,17 @@ class SecEdgarDataFetcher(DataFetcher):
 
     def fetch_data(self, ticker_symbol: str) -> StockDataFin:
 
+        info = {}
+        info["SEC data for ticker"] = ticker_symbol
+
         # Directory containing all folders within ticker directory
         base_dir = f'./data/sec-edgar-filings/{ticker_symbol}/'
 
         # Avoid overuse of edgar api, since its rate limit to 10 req/min
         filings = self.load_filings(base_dir)
         if len(filings) != 0:
-            return StockDataFin(SecEdgarDataFetcher.__name__, f"SEC data for ticker: {ticker_symbol}", [pd.DataFrame(filings)])
+
+            return StockDataFin(SecEdgarDataFetcher.__name__, info, [pd.DataFrame(filings)])
 
         dl = Downloader("MyCompanyName", "my.email@domain.com", "./data/")
         # 10-K anual reoport
@@ -85,9 +89,9 @@ class SecEdgarDataFetcher(DataFetcher):
                                  after="2024-05-01", before="2024-06-25")
             filings = self.load_filings(base_dir)
         except:
-            return StockDataFin(SecEdgarDataFetcher.__name__, ticker_symbol, [])
+            return StockDataFin(SecEdgarDataFetcher.__name__, info, [])
         # filepath = '.\\sec-edgar-filings\\NVO\\6-K\\0001171843-24-002400\\full-submission.txt'
-        return StockDataFin(SecEdgarDataFetcher.__name__, ticker_symbol, [pd.DataFrame(filings)])
+        return StockDataFin(SecEdgarDataFetcher.__name__, info, [pd.DataFrame(filings)])
 
     def load_filings(self, base_dir):
         filings = {}

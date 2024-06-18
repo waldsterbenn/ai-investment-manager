@@ -53,7 +53,7 @@ def remove_dataframe_nan(df):
     return df.dropna(how='all')
 
 
-def get_yf_data(ticker):
+def get_yf_data(ticker) -> yf.Ticker:
     """
     Fetches stock data for the given ticker using yfinance.
     :param ticker: Stock ticker symbol as a string.
@@ -142,7 +142,7 @@ def process_analysis_results(df):
 
 def hum_stock_analyzer_tool(ticker_symbol: str) -> tuple[dict, list[pd.DataFrame]]:
     """Returns human readable dataframe, with the results of the techical indicators."""
-    yf_ticker_data: pd.DataFrame = get_yf_data(ticker_symbol)
+    yf_ticker_data: yf.Ticker = get_yf_data(ticker_symbol)
     price_history: pd.DataFrame = fetch_stock_history_data(yf_ticker_data)
 
     analyst_recommendations: pd.DataFrame = yf_ticker_data.get_recommendations_summary()
