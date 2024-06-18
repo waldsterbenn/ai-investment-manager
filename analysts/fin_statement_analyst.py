@@ -75,7 +75,8 @@ class FinancialAnalyst:
                 if value.info is not None:
                     data_element += f"{value.info}\n"
                 if value.financial_indicators is not None:
-                    data_element += f"{value.financial_indicators.head(50).to_markdown(index=True)}\n"
+                    for dataframe in value.financial_indicators:
+                        data_element += f"{dataframe.head(50).to_markdown(index=True)}\n"
 
                 # ollama_completion = ollama_client.complete(
                 #     "extract only the important information in this text\n\n" + data_element)
@@ -86,6 +87,7 @@ class FinancialAnalyst:
         user_prompt = f"""
             You are an expert financial analyst.
             Analyse this financial statement for the stock: {ticker_symbol}.
+            Focus on the newest data, but also consider historical data.
             Be concrete and precise. Avoid generic answers and disclaimers.
 
             Make a concise report in Markdown format containing:

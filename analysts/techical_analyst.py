@@ -51,13 +51,14 @@ class TechnicalAnalyst:
                 if value.info is not None:
                     data_element += f"{value.info}\n"
                 if value.techical_indicators is not None:
-                    data_element += f"{value.techical_indicators.head(50).to_markdown(index=True)}\n"
+                    for table in value.techical_indicators:
+                        data_element += f"{table.to_markdown(index=True)}\n"
 
                 # ollama_completion = ollama_client.complete(
                 #     "extract only the important information in this text\n\n" + data_element)
                 # data_inject += ollama_completion.text
-                data_inject += data_element.replace(
-                    ' ', '').replace('\n', '').replace('nan', '') + '\n\n'
+                data_inject += data_element
+                # data_inject += data_element.replace(' ', '').replace('\n', '').replace('nan', '').replace('NaN', '') + '\n\n'
 
         user_prompt = f"""
                     You are an expert financial analyst. Analyse these technical data for for the stock: {ticker_symbol}.
@@ -67,7 +68,7 @@ class TechnicalAnalyst:
                         - Stock price.
                         - Stock performance numbers.
                         - Stock ytd growth.
-                        - Techical indicators (P/E, EPS, RSI etc.).
+                        - Techical indicators (MACD, ADX, RSI, SMA etc.).
     
                     Techical Data:
                     ---

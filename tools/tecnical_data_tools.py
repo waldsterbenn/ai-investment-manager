@@ -11,26 +11,72 @@ from tabulate import tabulate
 yfin_allowed_timespans = ['1d', '5d', '1mo', '3mo',
                           '6mo', '1y', '2y', '5y', '10y', 'ytd', 'max']
 
+yfin_allowed_intervals = ['1m', '2m', '5m', '15m', '30m',
+                          '60m', '90m', '1h', '1d', '5d', '1wk', '1mo', '3mo']
 
-def fetch_stock_data(ticker) -> tuple[dict, pd.DataFrame, pd.DataFrame]:
+
+def get_essential_info(data: yf.Ticker) -> dict:
+    inf = {}
+    inf["Name"] = data.info.get("longName")
+    inf["Industry"] = data.info.get("industryDisp")
+    inf["Sector"] = data.info.get("sectorDisp")
+    inf["Business Summary"] = data.info.get("longBusinessSummary")
+    inf["Forward PE Ratio"] = data.info.get("forwardPE")
+    inf["Beta"] = data.info.get("beta")
+    inf["Current Price"] = data.info.get('currentPrice')
+    inf["Target High Price"] = data.info.get('targetHighPrice')
+    inf["Target Low Price"] = data.info.get('targetLowPrice')
+    inf["Target Mean Price"] = data.info.get('targetMeanPrice')
+    inf["Target Median Price"] = data.info.get('targetMedianPrice')
+    inf["Recommendation Mean"] = data.info.get('recommendationMean')
+    inf["Recommendation Key"] = data.info.get('recommendationKey')
+    inf["Number of Analyst Opinions"] = data.info.get(
+        'numberOfAnalystOpinions')
+    inf["Short Ratio"] = data.info.get("shortRatio")
+    inf["Previous Close"] = data.fast_info.previous_close
+    inf["Day High"] = data.fast_info.day_high
+    inf["Day Low"] = data.fast_info.day_low
+    inf["Last Volume"] = data.fast_info.last_volume
+    inf["50-day Moving Average"] = data.fast_info.fifty_day_average
+    inf["200-day Moving Average"] = data.fast_info.two_hundred_day_average
+    inf["Year High"] = data.fast_info.year_high
+    inf["Year Low"] = data.fast_info.year_low
+    inf["Year-to-Date Change"] = data.fast_info.year_change
+    return inf
+
+
+def round_dataframe_to_3dec(df):
+    return df.round(3)
+
+
+def remove_dataframe_nan(df):
+    return df.dropna(how='all')
+
+
+def get_yf_data(ticker):
     """
     Fetches stock data for the given ticker using yfinance.
-
     :param ticker: Stock ticker symbol as a string.
     :return: DataFrame with stock data.
     """
     # Fetch data
     data = yf.Ticker(ticker)
+    return data
+
+
+def fetch_stock_history_data(yf_ticker_data) -> pd.DataFrame:
+
     # Get historical market data for the last n months
-    df = data.history(period=yfin_allowed_timespans[4])
+    df = yf_ticker_data.history(
+        period=yfin_allowed_timespans[3], interval=yfin_allowed_intervals[8])
 
     # Ensure the DataFrame index is a DatetimeIndex
     df.index = pd.DatetimeIndex(df.index)
 
-    return (data.info, df, data.get_recommendations_summary())
+    return df
 
 
-def analyze_stock(df):
+def techical_analysis(df: pd.DataFrame):
     """
     Performs technical analysis on the stock data using pandas_ta.
 
@@ -38,11 +84,11 @@ def analyze_stock(df):
     :return: DataFrame with analysis results.
     """
     # Calculate Simple Moving Averages
-    sma50 = ta.sma(df['Close'], length=50)
-    df['SMA_50'] = sma50
-    sma200 = ta.sma(df['Close'], length=200)
-    df['SMA_200'] = sma200
-    df['Golden Cross'] = sma50 > sma200
+    sma_short = ta.sma(df['Close'], length=10)
+    df['SMA_10'] = sma_short
+    sma_long = ta.sma(df['Close'], length=50)
+    df['SMA_50'] = sma_long
+    df['Golden Cross'] = sma_short > sma_long
 
     # Calculate MACD
     macd = ta.macd(df['Close'])
@@ -61,7 +107,12 @@ def analyze_stock(df):
 
     # Calculate RSI
     df['RSI'] = ta.rsi(df['Close'])
-    # print(df)
+
+    # Drop unnecessary columns
+    df = df.drop(columns=["Open", "High", "Low",
+                 "Dividends", "Stock Splits"], axis=1)
+    # Drop data from early dates since calculations are not setteled on those (i.e. avg)
+    df = df.tail(25)
     return df
 
 
@@ -88,73 +139,124 @@ def process_analysis_results(df):
 
     return recommendations
 
-# not in use
 
-
-def fu_stock_analyzer_tool(ticker_symbol: str) -> str:
-    """Returns the name of the pickled pandas dataframe, with the results of the techical indicators."""
-    (info, df) = fetch_stock_data(ticker_symbol)
-    df_with_analysis = analyze_stock(df)
-    pickle_filename = f"{ticker_symbol}_analysis.pkl"
-    df_with_analysis.to_pickle(pickle_filename)
-    print(f"DataFrame with analysis has been saved to {pickle_filename}.")
-    return f"DataFrame with analysis has been saved to {pickle_filename}."
-
-
-def hum_stock_analyzer_tool(ticker_symbol: str) -> tuple[dict, str]:
+def hum_stock_analyzer_tool(ticker_symbol: str) -> tuple[dict, list[pd.DataFrame]]:
     """Returns human readable dataframe, with the results of the techical indicators."""
-    (info, history_df, recdtn_df) = fetch_stock_data(ticker_symbol)
-    df_with_analysis = analyze_stock(history_df)
+    yf_ticker_data: pd.DataFrame = get_yf_data(ticker_symbol)
+    price_history: pd.DataFrame = fetch_stock_history_data(yf_ticker_data)
 
-    columns_to_display = ['Open', 'High', 'Low', 'Close', 'Volume', 'Golden Cross', 'SMA_50',
-                          'SMA_200', 'MACD_12_26_9', 'ADX_14', 'RSI_14']
-    existing_columns = [
-        col for col in columns_to_display if col in df_with_analysis.columns]
+    analyst_recommendations: pd.DataFrame = yf_ticker_data.get_recommendations_summary()
+
+    history_with_ta: pd.DataFrame = techical_analysis(price_history)
+
+    # data.balance_sheet.loc[['Total Assets',
+    #                         'Current Assets',
+    #                         'Working Capital',
+    #                         'Total Debt',
+    #                         'Total Non Current Liabilities Net Minority Interest']]
+
+    # columns_to_display = ['Open', 'High', 'Low', 'Close', 'Volume', 'Golden Cross', 'SMA_50',
+    #                       'SMA_200', 'MACD_12_26_9', 'ADX_14', 'RSI_14']
+    # existing_columns = [
+    #     col for col in columns_to_display if col in df_with_analysis.columns]
     # ta_table = tabulate(df_with_analysis[existing_columns].tail(
     #     50), headers='keys', tablefmt='psql', showindex=True)
     # rec_table = tabulate(recdtn_df, headers='keys',
     #                      tablefmt='psql', showindex=True)
 
-    df_with_analysis.columns = [
-        f'TechicalData_{col}' for col in df_with_analysis.columns]
-    recdtn_df.columns = [f'AnalystRating_{col}' for col in recdtn_df.columns]
+    info = get_essential_info(yf_ticker_data)
 
-    # Merge DataFrames on index
-    df = pd.concat([df_with_analysis, recdtn_df], axis=1)
-    df = df.dropna(how='all')
-    return (info, df)
+    return (info, [round_dataframe_to_3dec(remove_dataframe_nan(history_with_ta)),
+                   analyst_recommendations])
 
 
-# def get_financial_numbers(ticker_symbol: str) -> str:
-#     """Returns a dictionary with financial numbers."""
-#     data = yf.Ticker(ticker_symbol)
+"""
+    | Metric | Description |
+    | --- | --- |
+    | Total assets | The total value of all assets owned by the company. This includes both current and non-current (long-term) assets. |
+    | Current assets | Cash, accounts receivable, inventory, and other assets that are expected to be converted into cash within one year or the operating cycle, whichever is longer. These assets help in short-term financial operations. |
+    | Shareholders' equity | The amount of money invested by shareholders (share owners) in a company, calculated as total assets minus liabilities. This represents the residual interest or ownership percentage of the shareholders in the company. |
+    | Operating cash flow | The net cash generated from operating activities, which includes revenue-generating core business operations and excludes financing and investing activities. It shows how much cash a company generates from its normal business operations. |
+    | Net cash flow | The net increase or decrease in cash during a specific period, calculated as the sum of cash flows from operating, investing, and financing activities. A positive number indicates an increase in cash, while a negative number represents a decrease. |
+    | Total revenue | The total income generated by a company through its primary business activities, including sales, services, or other sources of income. This is the top line on an income statement and serves as the starting point for calculating a company's profitability. |
+    | Gross profit | The difference between total revenue and cost of goods sold (COGS). It represents the profit a company makes after accounting for the direct costs associated with producing its products or services. |
+    | Operating income | The profit earned from a company's core business operations, calculated as gross profit minus operating expenses such as selling, general, and administrative expenses. This metric helps assess a company's operational efficiency. |
+    | Net income | The final profit of a company after accounting for all expenses, including taxes, interest, and other non-operating items. It represents the bottom line on an income statement and is the most widely used measure of a company's profitability. |
 
-#     balance = tabulate(data.balance_sheet, headers='keys',
-#                        tablefmt='psql', showindex=True)
-#     fin = tabulate(data.financials, headers='keys',
-#                    tablefmt='psql', showindex=True)
-#     inc = tabulate(data.income_stmt, headers='keys',
-#                    tablefmt='psql', showindex=True)
-#     return '#Balance\n'+balance+'\n\n#Financials\n'+fin+'\n\n#Income statement\n'+inc
+    These metrics provide a concise overview of a company's financial health and performance, focusing on the most critical aspects that an analyst would typically analyze in their assessments.
+"""
 
-def get_financial_numbers(ticker_symbol: str) -> pd.DataFrame:
-    """Returns a dictionary with financial numbers."""
+
+def get_financial_numbers(ticker_symbol: str) -> tuple[dict, list[pd.DataFrame]]:
+    """Returns dict with company info and tables with financial numbers."""
     data = yf.Ticker(ticker_symbol)
+    info = get_essential_info(data)
 
-    balance = data.balance_sheet
-    fin = data.financials
-    return fin.dropna(how='all')
-    inc = data.income_stmt
+    # 5 years of balance sheets
+    five_yearbalance = data.balance_sheet.loc[['Total Assets',
+                                               'Current Assets',
+                                               'Working Capital',
+                                               'Total Debt',
+                                               'Total Non Current Liabilities Net Minority Interest']]
 
-    # Add prefix to DataFrame columns to make them unique and clear
-    balance.columns = [f'Balance_{col}' for col in balance.columns]
-    fin.columns = [f'Financial_{col}' for col in fin.columns]
-    inc.columns = [f'Income_{col}' for col in inc.columns]
+    # 4 latest quarter's balance sheet
+    four_quater_balance = data.quarterly_balance_sheet.iloc[:, 0:4]
+    four_quater_balance = four_quater_balance.loc[['Total Assets',
+                                                   'Current Assets',
+                                                   'Working Capital',
+                                                   'Total Debt',
+                                                   'Total Non Current Liabilities Net Minority Interest']]
 
-    # Merge DataFrames on index
-    df = pd.concat([balance, fin, inc], axis=1)
+    # Cash Flow
+    columns_to_include = ['Free Cash Flow', 'Capital Expenditure', 'Operating Gains Losses',
+                          'Operating Cash Flow', 'Beginning Cash Position', 'End Cash Position']
+    # Skip columns that are not found
+    existing_columns = data.cash_flow.index.intersection(columns_to_include)
+    five_year_cash_flow = data.cash_flow.loc[existing_columns]
 
-    # Convert DataFrame to markdown table
-    # md_table = df.to_markdown(index=True)
+    four_quater_cash_flow = data.quarterly_cash_flow.iloc[:, 0:4]
 
-    return df
+    columns_to_include = [
+        'Free Cash Flow',
+        'Capital Expenditure',
+        'Operating Gains Losses',
+        'Operating Cash Flow',
+        'Beginning Cash Position',
+        'End Cash Position'
+    ]
+
+    existing_columns = four_quater_cash_flow.index.intersection(
+        columns_to_include)
+    four_quater_cash_flow = four_quater_cash_flow.loc[existing_columns]
+
+    # Income Statement
+    columns_to_include = [
+        "Total Revenue",
+        "Gross Profit",
+        "Operating Income",
+        "Net Income"
+    ]
+
+    existing_columns = data.income_stmt.index.intersection(columns_to_include)
+    five_year_income = data.income_stmt.loc[existing_columns]
+
+    columns_to_include = [
+        "Total Revenue",
+        "Gross Profit",
+        "Operating Income",
+        "Net Income"
+    ]
+    four_quater_income: pd.DataFrame = data.quarterly_income_stmt.iloc[:, 0:4]
+    existing_columns = four_quater_income.index.intersection(
+        columns_to_include)
+
+    four_quater_income = data.quarterly_income_stmt.loc[existing_columns]
+
+    yearly_metrics_df = pd.concat(
+        [five_yearbalance, five_year_cash_flow, five_year_income], axis=1)
+
+    quater_metrics_df = pd.concat(
+        [four_quater_balance, four_quater_cash_flow, four_quater_income], axis=1)
+
+    return (info, [round_dataframe_to_3dec(remove_dataframe_nan(yearly_metrics_df)),
+                   round_dataframe_to_3dec(remove_dataframe_nan(quater_metrics_df))])

@@ -4,14 +4,14 @@ import pandas as pd
 
 
 class StockDataTech:
-    def __init__(self, fetcher_name: str, info: dict, techical_indicators: pd.DataFrame) -> None:
+    def __init__(self, fetcher_name: str, info: dict, techical_indicators: list[pd.DataFrame]) -> None:
         self.fetcher_name = fetcher_name
         self.info = info
         self.techical_indicators = techical_indicators
 
 
 class StockDataFin:
-    def __init__(self, fetcher_name: str, info: dict, financial_indicators: pd.DataFrame) -> None:
+    def __init__(self, fetcher_name: str, info: dict, financial_indicators: list[pd.DataFrame]) -> None:
         self.fetcher_name = fetcher_name
         self.info = info
         self.financial_indicators = financial_indicators
