@@ -62,10 +62,10 @@ class LlmConfigFactory:
 
     def getModel(self, modelType: LlmModelType) -> LlmModelConfig:
         if (modelType == LlmModelType.techical):
-            new_var = self.llm_model_config["llm_model_techical"]
-            new_var1 = SupportedModels[str(new_var).lower()]
-            new_var2 = llm_models_config[new_var1]
-            return new_var2
+            llm_key = self.llm_model_config["llm_model_techical"]
+            model = SupportedModels[str(llm_key).lower()]
+            conf = llm_models_config[model]
+            return conf
         if (modelType == LlmModelType.finanical):
             return llm_models_config[SupportedModels[str(self.llm_model_config["llm_model_financial"]).lower()]]
         if (modelType == LlmModelType.advisory):

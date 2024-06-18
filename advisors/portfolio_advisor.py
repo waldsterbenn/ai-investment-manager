@@ -1,3 +1,4 @@
+import os
 from typing import Dict
 from llama_index.llms.ollama import Ollama
 import logging
@@ -29,21 +30,83 @@ class PortfolioAdvisor:
             stream=False,
             context_window=self.llm_model_to_use.context_window
         )
+
+        # Summarize the reports or else our prompt will be huge
         reports = ""
         for report in report_files:
-            with open(report) as f:
-                reports += report+''.join(f.readlines()) + '\n\n'
+            summary = self.summarize_report(report, ollama_client)
+            reports += summary + '\n\n'
 
         user_prompt = f"""
                     You are an expert financial advisor.
-                    Based on the provided reports, and make a buy, sell or hold rating on ALL stocks in the portfolio.
-                    Be concrete and precise. Avoid generic answers and disclaimers.
+                    Remember: Be concrete and precise. Avoid generic answers and disclaimers.
                     
+                    First task: 
+                    You provide advice on the quality of the portfolio.
+                    Asses for both long term and short term positions.
+                    
+                    Second task: 
+                    Based on the provided reports, give all the stocks in the portfolio a buy/hold/sell rating.
+                                        
                     Make a list in Markdown containing a table with each stock's recommendation.
                     
-                    Reports:
+                    Stock Reports:
                     ---
                     {reports}
+                    ---
+                """
+        log.info(f"LLM analysing query. Prompt {len(user_prompt)} chars.")
+        ollama_completion = ollama_client.complete(user_prompt)
+        report_text = ollama_completion.text
+        return report_text.strip()
+
+    def summarize_report(self, report_file: str, ollama_client: Ollama):
+        text = ""
+        with open(report_file) as f:
+            text = ''.join(f.readlines())
+        if text == "":
+            return
+
+        user_prompt = f"""
+                    Summarize this but make sure to keep essential information.
+                    ---
+                    {text}
+                    ---
+                """
+        log.info(f"Summarizing report. Prompt {len(user_prompt)} chars.")
+        ollama_completion = ollama_client.complete(user_prompt)
+        return ollama_completion.text
+
+    def asses_portfolio(self):
+        # Assess the quality of the portfolio.
+
+        log.info(
+            f"Portfolilo assesment analysis LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
+
+        ollama_client = Ollama(
+            model=self.llm_model_to_use.name,
+            request_timeout=15000.0,
+            temperature=self.llm_temperature,
+            stream=False,
+            context_window=self.llm_model_to_use.context_window
+        )
+
+        portflio = ""
+
+        with open(f"./reports/portfolio_advice_report.md") as f:
+            portflio = ''.join(f.readlines())
+        if portflio == "":
+            return
+
+        user_prompt = f"""
+                    You are an expert financial advisor.
+                    Be concrete and precise. Avoid generic answers and disclaimers.
+                    
+                    Based on the provided Portfolio Report, make an assesment in Markdown, where you assess the quality of the portfolio.
+                    
+                    Portfolio Report:
+                    ---
+                    {portflio}
                     ---
                 """
         log.info(f"LLM analysing query. Prompt {len(user_prompt)} chars.")
