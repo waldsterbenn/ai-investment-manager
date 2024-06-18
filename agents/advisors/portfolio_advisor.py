@@ -2,6 +2,7 @@ from llama_index.llms.ollama import Ollama
 import logging
 import logging.config
 
+from agents.advisors.report_summarizer import ReportSummarizer
 from tools.llm_config_factory import LlmModelConfig
 
 # Load the logging configuration
@@ -12,10 +13,11 @@ log = logging.getLogger('sampleLogger')
 
 
 class PortfolioAdvisor:
-    def __init__(self, llm_model_to_use: LlmModelConfig, dry_run: bool = False) -> None:
+    def __init__(self, llm_model_to_use: LlmModelConfig, report_summarizer: ReportSummarizer, dry_run: bool = False) -> None:
         self.llm_model_to_use = llm_model_to_use
-        self.llm_temperature = 0.3
+        self.llm_temperature = 0.5
         self.dry_run = dry_run
+        self.report_summarizer = report_summarizer
 
     def provide_advice(self, report_files: list[str]) -> str:
         if self.dry_run:
@@ -34,13 +36,11 @@ class PortfolioAdvisor:
         )
 
         # Summarize the reports or else our prompt will be huge
-        reports = ""
-        for report in report_files:
-            summary = self.summarize_report(report, ollama_client)
-            reports += summary + '\n\n'
+        summaries = self.report_summarizer.summarize_reports(report_files)
+        reports = '\n\n'.join(summaries)
 
         user_prompt = f"""
-                    You are an expert financial advisor.
+                    You are a world class financial advisor.
                     Remember: Be concrete and precise. Avoid generic answers and disclaimers.
                     
                     First task: 
@@ -50,7 +50,7 @@ class PortfolioAdvisor:
                     Second task: 
                     Based on the provided reports, give all the stocks in the portfolio a buy/hold/sell rating.
                                         
-                    Make a list in Markdown containing a table with each stock's recommendation.
+                    Make output in Markdown. Prefer using tables.
                     
                     Stock Reports:
                     ---
@@ -61,24 +61,6 @@ class PortfolioAdvisor:
         ollama_completion = ollama_client.complete(user_prompt)
         report_text = ollama_completion.text
         return report_text.strip()
-
-    def summarize_report(self, report_file: str, ollama_client: Ollama) -> str:
-        text = ""
-        with open(report_file) as f:
-            text = ''.join(f.readlines())
-        if text == "":
-            return ""
-
-        user_prompt = f"""
-                    Summarize this but make sure to keep essential information. Especially buy/hold/sell rating.
-                    Clearly state which stock it is.
-                    ---
-                    {text}
-                    ---
-                """
-        log.info(f"Summarizing report. Prompt {len(user_prompt)} chars.")
-        ollama_completion = ollama_client.complete(user_prompt)
-        return ollama_completion.text
 
     def asses_portfolio(self, portfolio_advice) -> str:
         # Assess the quality of the portfolio.
@@ -96,7 +78,7 @@ class PortfolioAdvisor:
 
         user_prompt = f"""
                     You are an expert financial advisor.
-                    Be concrete and precise. Avoid generic answers and disclaimers.
+                    Be concise, concrete and precise. Avoid generic answers and disclaimers.
                     
                     Based on the provided Portfolio Report, make an assesment in Markdown, where you assess the quality of the portfolio.
                     

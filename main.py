@@ -1,6 +1,7 @@
 import json
 import os
 from agents.advisors.portfolio_advisor import PortfolioAdvisor
+from agents.advisors.report_summarizer import ReportSummarizer
 from components.report_generator import ReportGenerator
 import logging
 import logging.config
@@ -51,8 +52,11 @@ if __name__ == "__main__":
             # Get the full path to the file
             files.append(os.path.join(foldername, filename))
 
+    summarizer = ReportSummarizer(
+        llmConfigFactory.getModel(LlmModelType.summarizer))
+
     portfolio_advisor = PortfolioAdvisor(
-        llmConfigFactory.getModel(LlmModelType.healthcheck))
+        llmConfigFactory.getModel(LlmModelType.healthcheck), summarizer)
 
     advice = portfolio_advisor.provide_advice(files)
     report_generator.write_advice_report(advice)
