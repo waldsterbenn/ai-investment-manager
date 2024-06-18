@@ -41,16 +41,18 @@ class PortfolioAdvisor:
 
         user_prompt = f"""
                     You are a world class financial advisor.
-                    Remember: Be concrete and precise. Avoid generic answers and disclaimers.
+                    Remember: 
+                     - Be concrete and precise. Avoid generic answers and disclaimers.
+                     - Make output in Markdown. 
+                     - Prefer to present data in tables.
                     
                     First task: 
                     You provide advice on the quality of the portfolio.
-                    Asses for both long term and short term positions.
+                    Asses the individual stocks for both long term and short term positions.
                     
                     Second task: 
-                    Based on the provided reports, give all the stocks in the portfolio a buy/hold/sell rating.
-                                        
-                    Make output in Markdown. Prefer using tables.
+                    Based on the provided 'Stock Reports', give all the stocks in the portfolio a buy/hold/sell rating.
+                    Put these ratings in a table.
                     
                     Stock Reports:
                     ---
@@ -80,8 +82,8 @@ class PortfolioAdvisor:
                     You are an expert financial advisor.
                     Be concise, concrete and precise. Avoid generic answers and disclaimers.
                     
-                    Based on the provided Portfolio Report, make an assesment in Markdown, where you assess the quality of the portfolio.
-                    
+                    Based on the provided 'Portfolio Report', make an overall assesment on quality of the portfolio.
+                                        
                     Portfolio Report:
                     ---
                     {portfolio_advice}

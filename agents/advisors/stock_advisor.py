@@ -51,22 +51,22 @@ class StockAdvisor:
                     You are an expert financial advisor with expertice in trading on the stock market.
                     Be concrete and precise. Avoid generic answers and disclaimers.
                     
-                    Analyse the techical and financial reports and provide investment advice.
-                    Based on input from 'Financial statement analyst' (finanicals) and 'Techical data analysist' (techical data), 
+                    Analyse the Techical and Financial reports and provide investment advice.
+                    Based on input from 'Financial statement analyst' ('Financial Report') and 'Techical data analysist' ('Techical Report'), 
                     try to figure out if the company will be profitable.
                     
                     Make a report in Markdown containing:
                         - Is the company profitable?
                         - Is there harmoy between technical indicators and financials?
-                        - What are the sort term risk and long term?
+                        - What are the sort and long term risks?
                         - What are the riskfactors, i.e. geopolitical, macro, cyclical, technology, compitition, finanical trends.
-                        - Buy or sell rating?
+                        - Make a Buy, Hold or Sell rating.
                     
-                    Techical report:
+                    Techical Report:
                     ---
                     {technical_analysis} 
                     ---
-                    Financial report:
+                    Financial Report:
                     ---
                     {financial_analysis} 
                     ---

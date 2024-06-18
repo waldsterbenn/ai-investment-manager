@@ -38,8 +38,11 @@ class ReportSummarizer:
             return ""
 
         user_prompt = f"""
-                    Summarize this but make sure to keep essential information. Especially buy/hold/sell rating.
-                    Clearly state which stock it is.
+                    Summarize this text. 
+                    Remember: 
+                     - Keep essential information. 
+                     - Preserve buy/hold/sell rating.
+                     - Clearly state which stock it is.
                     ---
                     {text}
                     ---
