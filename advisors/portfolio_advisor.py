@@ -77,7 +77,7 @@ class PortfolioAdvisor:
         ollama_completion = ollama_client.complete(user_prompt)
         return ollama_completion.text
 
-    def asses_portfolio(self):
+    def asses_portfolio(self, portfolio_advice):
         # Assess the quality of the portfolio.
 
         log.info(
@@ -91,13 +91,6 @@ class PortfolioAdvisor:
             context_window=self.llm_model_to_use.context_window
         )
 
-        portflio = ""
-
-        with open(f"./reports/portfolio_advice_report.md") as f:
-            portflio = ''.join(f.readlines())
-        if portflio == "":
-            return
-
         user_prompt = f"""
                     You are an expert financial advisor.
                     Be concrete and precise. Avoid generic answers and disclaimers.
@@ -106,7 +99,7 @@ class PortfolioAdvisor:
                     
                     Portfolio Report:
                     ---
-                    {portflio}
+                    {portfolio_advice}
                     ---
                 """
         log.info(f"LLM analysing query. Prompt {len(user_prompt)} chars.")
