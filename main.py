@@ -1,5 +1,7 @@
+from datetime import date
 import json
 import os
+import time
 from agents.advisors.portfolio_advisor import PortfolioAdvisor
 from agents.advisors.report_summarizer import ReportSummarizer
 from components.report_generator import ReportGenerator
@@ -34,18 +36,26 @@ if __name__ == "__main__":
     report_generator = ReportGenerator()
     processor = StockInformationProcessor(api_keys, llmConfigFactory)
 
-    if not os.path.exists("./reports/"):
-        os.mkdir("./reports/")
+    base_folder = "reports"
+    if not os.path.exists(base_folder):
+        os.mkdir(base_folder)
+
+    fmt = "%Y-%m-%d"
+    date_str = f"{time.strftime(fmt, time.gmtime())}"
+    report_folder = os.path.join(base_folder, f"report_{date_str}")
+
+    if not os.path.exists(report_folder):
+        os.mkdir(report_folder)
 
     for ticker_symbol in app_config["portfolio_tickers"]:
-        if os.path.exists(f"./reports/{ticker_symbol}_report.md"):
-            continue
+        if os.path.exists(f"{report_folder}/{ticker_symbol}_report.md"):
+            continue  # Skip existing reports
         advice_on_stock = processor.process(ticker_symbol)
         report_path = report_generator.write_stock_report(
-            ticker_symbol, advice_on_stock)
+            report_folder,            ticker_symbol, advice_on_stock)
 
     files = []
-    for foldername, subfolders, filenames in os.walk('./reports/'):
+    for foldername, subfolders, filenames in os.walk(report_folder):
         for filename in filenames:
             if filename == "portfolio_advice_report.md" or filename == "portfolio_assesment_report.md":
                 continue
@@ -59,7 +69,10 @@ if __name__ == "__main__":
         llmConfigFactory.getModel(LlmModelType.healthcheck), summarizer)
 
     advice = portfolio_advisor.provide_advice(files)
-    report_generator.write_advice_report(advice)
+    advice_file = report_generator.write_advice_report(report_folder, advice)
+    log.info(f"Portfolio investment advice: {advice_file}")
 
     assesment = portfolio_advisor.asses_portfolio(advice)
-    report_generator.write_assesment_report(assesment)
+    assesment_file = report_generator.write_assesment_report(
+        report_folder, assesment)
+    log.info(f"Portfolio assesment: {assesment_file}")

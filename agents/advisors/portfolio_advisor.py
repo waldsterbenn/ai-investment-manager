@@ -25,7 +25,7 @@ class PortfolioAdvisor:
 
         # Combine analyses and provide investment advice
         log.info(
-            f"Advisor analysis LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
+            f"Advisor analysis of {len(report_files)} stock reports. LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
 
         ollama_client = Ollama(
             model=self.llm_model_to_use.name,

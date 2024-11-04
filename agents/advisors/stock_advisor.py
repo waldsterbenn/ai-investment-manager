@@ -49,11 +49,11 @@ class StockAdvisor:
 
         user_prompt = f"""
                     You are an expert financial advisor with expertice in trading on the stock market.
-                    Be concrete and precise. Avoid generic answers and disclaimers.
+                    Be critical, concrete and precise. Avoid generic answers and disclaimers.
                     
                     Analyse the Techical and Financial reports and provide investment advice.
                     Based on input from 'Financial statement analyst' ('Financial Report') and 'Techical data analysist' ('Techical Report'), 
-                    try to figure out if the company will be profitable.
+                    try to assess if the company will be profitable in the future.
                     
                     Make a report in Markdown containing:
                         - Is the company profitable?

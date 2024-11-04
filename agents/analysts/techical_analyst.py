@@ -38,7 +38,7 @@ class TechnicalAnalyst:
             {"techical_report": "This is a report containing Technical Analysis of the stock."}
 
         log.info(
-            f"Techical analysis LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
+            f"Techical analysis of ticker: {ticker_symbol}. LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
         ollama_client = Ollama(
             model=self.llm_model_to_use.name,
             request_timeout=15000.0,

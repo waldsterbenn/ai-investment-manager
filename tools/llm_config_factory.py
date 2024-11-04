@@ -32,6 +32,7 @@ class SupportedModels(Enum):
     qwen2_7b = 12
     llama3_8b_q8 = 13
     phi3_3b = 14
+    llama3_2 = 15
 
 
 # Før man kan bruge andre modeller skal man hente dem via "ollama pull <modelname>"
@@ -54,6 +55,7 @@ llm_models_config = {
 
     # this is q4 default
     SupportedModels.qwen2_7b:  LlmModelConfig("qwen2", 128000),
+    SupportedModels.llama3_2:  LlmModelConfig("llama3.2", 131072),
 }
 
 

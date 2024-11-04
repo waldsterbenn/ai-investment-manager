@@ -40,7 +40,7 @@ class FinancialAnalyst:
             {"financial_report": "This is a report containing Financial Analysis of the stock."}
 
         log.info(
-            f"Financial statement analysis LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
+            f"Financial statement analysis ticker: {ticker_symbol}. LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
 
         ollama_client = Ollama(
             model=self.llm_model_to_use.name,

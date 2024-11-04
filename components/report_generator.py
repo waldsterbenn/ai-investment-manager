@@ -3,16 +3,18 @@ import time
 
 
 class ReportGenerator:
-    def ensure_report_dir(self):
-        if not os.path.exists("./reports/"):
-            os.mkdir("./reports/")
+    def ensure_report_dir(self, report_folder: str):
+        if not os.path.exists(report_folder):
+            os.mkdir(report_folder)
 
-    def write_to_file(self, file_name: str, text: str):
-        self.ensure_report_dir()
-        with open(file_name, "w", encoding="utf-8") as file:
+    def write_to_file(self, report_folder: str, file_name: str, text: str) -> str:
+        self.ensure_report_dir(report_folder)
+        file_path = os.path.join(report_folder, file_name)
+        with open(file_path, "w", encoding="utf-8") as file:
             file.write(text)
+        return os.path.abspath(file_path)
 
-    def write_stock_report(self, ticker_symbol: str, stock_advice: str) -> str:
+    def write_stock_report(self, report_folder: str, ticker_symbol: str, stock_advice: str) -> str:
         # Generate markdown report
 
         report_time = time.time()
@@ -26,12 +28,10 @@ class ReportGenerator:
             f"> Report generated at: {time.ctime(report_time)}",
         ])
 
-        self.ensure_report_dir()
-        output_filename = f"./reports/{ticker_symbol}_report.md"
-        self.write_to_file(output_filename, report)
-        return os.path.abspath(output_filename)
+        output_filename = f"{ticker_symbol}_report.md"
+        return self.write_to_file(report_folder, output_filename, report)
 
-    def write_advice_report(self, portfolio_advice: str):
+    def write_advice_report(self, report_folder: str, portfolio_advice: str) -> str:
         report_time = time.time()
         # Join different sections of the report to avoid unwanted spaces in final string
         report = "\n\n".join([
@@ -40,10 +40,10 @@ class ReportGenerator:
             "# Notes",
             "> Report generated at {0}".format(time.ctime(report_time)),
         ])
-        output_filename = f"./reports/portfolio_advice_report.md"
-        self.write_to_file(output_filename, report)
+        output_filename = f"portfolio_advice_report.md"
+        return self.write_to_file(report_folder, output_filename, report)
 
-    def write_assesment_report(self, portfolio_assesment: str):
+    def write_assesment_report(self, report_folder: str, portfolio_assesment: str) -> str:
         report_time = time.time()
         # Join different sections of the report to avoid unwanted spaces in final string
         report = "\n\n".join([
@@ -52,5 +52,5 @@ class ReportGenerator:
             "# Notes",
             "> Report generated at {0}".format(time.ctime(report_time)),
         ])
-        output_filename = f"./reports/portfolio_assesment_report.md"
-        self.write_to_file(output_filename, report)
+        output_filename = f"portfolio_assesment_report.md"
+        return self.write_to_file(report_folder, output_filename, report)
