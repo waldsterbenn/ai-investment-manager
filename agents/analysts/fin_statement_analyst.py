@@ -13,18 +13,24 @@
 """
 
 
+import os
 from typing import Dict
 from llama_index.llms.ollama import Ollama
 from components.data_acq_layer import StockDataFin
+from portfolio_item import PortfolioItem
 from tools.llm_config_factory import LlmModelConfig
 import logging
 import logging.config
 
-# Load the logging configuration
-logging.config.fileConfig('./config/logging.config')
+try:
+    # Load the logging configuration
+    logging.config.fileConfig(os.path.abspath(os.path.join(
+        os.path.dirname(__file__), '../../config/logging.config')))
 
-# Get the logger specified in the configuration file
-log = logging.getLogger('sampleLogger')
+    # Get the logger specified in the configuration file
+    log = logging.getLogger('sampleLogger')
+except FileNotFoundError:
+    error = "#ignore"
 
 
 class FinancialAnalyst:
@@ -34,13 +40,14 @@ class FinancialAnalyst:
         self.llm_temperature = 0.2
         self.dry_run = dry_run
 
-    def analyse_financials(self, data: list[StockDataFin], ticker_symbol: str) -> Dict[str, str]:
+    def analyse_financials(self, data: list[StockDataFin], stock: PortfolioItem) -> Dict[str, str]:
 
         if self.dry_run:
-            {"financial_report": "This is a report containing Financial Analysis of the stock."}
+            {"financial_report":
+                f"This is a report containing Financial Analysis of the stock {stock.name} ({stock.ticker_symbol})"}
 
         log.info(
-            f"Financial statement analysis ticker: {ticker_symbol}. LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
+            f"Financial statement analysis of {stock.name} ({stock.ticker_symbol}). LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
 
         ollama_client = Ollama(
             model=self.llm_model_to_use.name,
@@ -63,9 +70,15 @@ class FinancialAnalyst:
                 data_inject += data_element.replace(
                     ' ', '').replace('\n', '').replace('nan', '') + '\n\n'
 
+        buy_info = (
+            (f"It was bought on {stock.buy_date}." if stock.buy_date else "")
+            + ("Buy price: " +
+               (f"{stock.buy_price} {stock.currency}" if stock.buy_price and stock.currency else ""))
+        )
         user_prompt = f"""
             You are an expert financial analyst.
-            Analyse this financial statement for the stock: {ticker_symbol}.
+            Analyse this financial statement for the stock {stock.name} ({stock.ticker_symbol}).
+            {buy_info if buy_info else ""}
             Focus on the newest data, but also consider historical data.
             Be concrete and precise. Avoid generic answers and disclaimers.
 

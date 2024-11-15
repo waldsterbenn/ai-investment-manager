@@ -11,6 +11,7 @@
 # - Buy or sell?
 """
 
+import os
 from typing import Dict
 from llama_index.llms.ollama import Ollama
 import logging
@@ -18,11 +19,15 @@ import logging.config
 
 from tools.llm_config_factory import LlmModelConfig
 
-# Load the logging configuration
-logging.config.fileConfig('./config/logging.config')
+try:
+    # Load the logging configuration
+    logging.config.fileConfig(os.path.abspath(os.path.join(
+        os.path.dirname(__file__), '../../config/logging.config')))
 
-# Get the logger specified in the configuration file
-log = logging.getLogger('sampleLogger')
+    # Get the logger specified in the configuration file
+    log = logging.getLogger('sampleLogger')
+except FileNotFoundError:
+    error = "#ignore"
 
 
 class StockAdvisor:
@@ -30,6 +35,45 @@ class StockAdvisor:
         self.llm_model_to_use = llm_model_to_use
         self.llm_temperature = 0.3
         self.dry_run = dry_run
+
+    def makeTechicalReport(self, technical_analysis: Dict[str, str]) -> str:
+        if self.dry_run:
+            return "This is a report containing advice on the stock, based on Techical Analysis."
+
+        # Combine analyses and provide investment advice
+        log.info(
+            f"Advisor analysis LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
+
+        ollama_client = Ollama(
+            model=self.llm_model_to_use.name,
+            request_timeout=15000.0,
+            temperature=self.llm_temperature,
+            stream=False,
+            context_window=self.llm_model_to_use.context_window
+        )
+
+        user_prompt = f"""
+                    You are an expert financial advisor with expertice in trading on the stock market.
+                    Be critical, concrete and precise. Avoid generic answers and disclaimers.
+                    
+                    Analyse the Techical reports and provide investment advice.
+                    Based on input from 'Techical data analysist' ('Techical Report'), 
+                    try to assess if the company is a good buy now or its a good time to sell.
+                    
+                    Make a report in Markdown containing:
+                        - What does the technical indicators tell us?
+                        - What are the sort and long term risks, if any?
+                        - Make a Buy, Hold or Sell rating.
+                    
+                    Techical Report:
+                    ---
+                    {technical_analysis} 
+                    ---
+                """
+        log.info(f"LLM analysing query. Prompt {len(user_prompt)} chars.")
+        ollama_completion = ollama_client.complete(user_prompt)
+        report_text = ollama_completion.text
+        return report_text.strip()
 
     def provide_advice(self, technical_analysis: Dict[str, str], financial_analysis: Dict[str, str]) -> str:
         if self.dry_run:

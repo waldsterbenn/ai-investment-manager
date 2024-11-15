@@ -1,6 +1,4 @@
 {
-    
-    "portfolio_tickers": ["DE", "IONQ"],
     "llm_model":
     {
         "llm_model_techical": "llama3_2",

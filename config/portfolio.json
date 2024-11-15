@@ -1,0 +1,32 @@
+{
+    "portfolio": [
+        {
+            "name":"John Deere",
+            "ticker_symbol":"DE",
+            "buy_price":386.12,
+            "currency":"USD",
+            "buy_date":"2024-06-18"
+        }, 
+        {
+            "name":"Veeco",
+            "ticker_symbol":"VECO",
+            "buy_price":24.75,
+            "currency":"USD",
+            "buy_date":""
+        }, 
+        {
+            "name":"DELL",
+            "ticker_symbol":"DELL",
+            "buy_price":135.49,
+            "currency":"USD",
+            "buy_date":""
+        }, 
+        {
+            "name":"Genmab",
+            "ticker_symbol":"GMAB.CO",
+            "buy_price":1907.4,
+            "currency":"DKK",
+            "buy_date":""
+        }
+    ]
+}

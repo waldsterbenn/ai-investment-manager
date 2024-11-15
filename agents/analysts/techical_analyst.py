@@ -11,15 +11,18 @@
     - Stock ytd growth.
     - Techical indicators (P/E, EPS, RSI etc.).
 """
+import os
 from typing import Dict
 from llama_index.llms.ollama import Ollama
 from components.data_acq_layer import StockDataTech
+from portfolio_item import PortfolioItem
 from tools.llm_config_factory import LlmModelConfig
 import logging
 import logging.config
 
 # Load the logging configuration
-logging.config.fileConfig('./config/logging.config')
+logging.config.fileConfig(os.path.abspath(os.path.join(
+    os.path.dirname(__file__), '../../config/logging.config')))
 
 # Get the logger specified in the configuration file
 log = logging.getLogger('sampleLogger')
@@ -32,13 +35,14 @@ class TechnicalAnalyst:
         self.llm_temperature = 0.2
         self.dry_run = dry_run
 
-    def analyse_technicals(self, data: list[StockDataTech], ticker_symbol: str) -> Dict[str, str]:
+    def analyse_technicals(self, data: list[StockDataTech], stock: PortfolioItem) -> Dict[str, str]:
 
         if self.dry_run:
-            {"techical_report": "This is a report containing Technical Analysis of the stock."}
+            {"techical_report":
+                f"This is a report containing Technical Analysis of the stock {stock.name} ({stock.ticker_symbol})"}
 
         log.info(
-            f"Techical analysis of ticker: {ticker_symbol}. LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
+            f"Techical analysis of {stock.name} ({stock.ticker_symbol}). LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
         ollama_client = Ollama(
             model=self.llm_model_to_use.name,
             request_timeout=15000.0,
@@ -59,8 +63,14 @@ class TechnicalAnalyst:
 
                 data_inject += data_element
 
+        buy_info = (
+            (f"It was bought on {stock.buy_date}." if stock.buy_date else "")
+            + ("Buy price: " +
+               (f"{stock.buy_price} {stock.currency}" if stock.buy_price and stock.currency else ""))
+        )
         user_prompt = f"""
-                    You are an expert financial analyst. Analyse these technical data for for the stock: {ticker_symbol}.
+                    You are an expert financial analyst. Analyse these technical data for for the stock: {stock.name} ({stock.ticker_symbol}).
+                    {buy_info if buy_info else ""}
                     Be concrete and precise. Avoid generic answers and disclaimers.
                     Analyze trends, momentum, volatility, etc.
                     Make a concise report in Markdown format, containing:

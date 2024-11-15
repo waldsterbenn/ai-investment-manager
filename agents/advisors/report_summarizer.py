@@ -1,10 +1,12 @@
+import os
 from llama_index.llms.ollama import Ollama
 from tools.llm_config_factory import LlmModelConfig
 import logging
 import logging.config
 
 # Load the logging configuration
-logging.config.fileConfig('./config/logging.config')
+logging.config.fileConfig(os.path.abspath(os.path.join(
+    os.path.dirname(__file__), './config/logging.config')))
 
 # Get the logger specified in the configuration file
 log = logging.getLogger('sampleLogger')

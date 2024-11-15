@@ -1,4 +1,3 @@
-from datetime import date
 import json
 import os
 import time
@@ -8,24 +7,27 @@ from components.report_generator import ReportGenerator
 import logging
 import logging.config
 
+from portfolio_loader import PortfolioLoader
 from stock_information_processor import StockInformationProcessor
 from tools.llm_config_factory import LlmConfigFactory, LlmModelType
 
+config_path = os.path.abspath(os.path.join(
+    os.path.dirname(__file__), './config/'))
+
 # Load the logging configuration
-logging.config.fileConfig('./config/logging.config')
+logging.config.fileConfig(os.path.join(config_path, "logging.config"))
 
 # Get the logger specified in the configuration file
 log = logging.getLogger('sampleLogger')
 
-
 if __name__ == "__main__":
     try:
-        with open("./config/api_keys.json") as keysFile:
+        with open(os.path.join(config_path, "api_keys.json")) as keysFile:
             api_keys = json.load(keysFile)
     except FileNotFoundError as e:
         log.error(e)
     try:
-        with open("./config/app_config.json") as f:
+        with open(os.path.join(config_path, "app_config.json")) as f:
             app_config = json.load(f)
 
     except FileNotFoundError as e:
@@ -47,12 +49,15 @@ if __name__ == "__main__":
     if not os.path.exists(report_folder):
         os.mkdir(report_folder)
 
-    for ticker_symbol in app_config["portfolio_tickers"]:
-        if os.path.exists(f"{report_folder}/{ticker_symbol}_report.md"):
+    stocks = PortfolioLoader(os.path.join(
+        config_path, "portfolio.json")).load()
+
+    for stock in stocks:
+        if os.path.exists(f"{report_folder}/{stock.ticker_symbol}_report.md"):
             continue  # Skip existing reports
-        advice_on_stock = processor.process(ticker_symbol)
+        advice_on_stock = processor.process(stock)
         report_path = report_generator.write_stock_report(
-            report_folder,            ticker_symbol, advice_on_stock)
+            report_folder, stock.ticker_symbol, advice_on_stock)
 
     files = []
     for foldername, subfolders, filenames in os.walk(report_folder):
