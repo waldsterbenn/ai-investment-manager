@@ -72,7 +72,8 @@ class StockInformationProcessor:
         return advice_on_stock
 
     def runTechicalAnalysis(self, stock: PortfolioItem) -> str:
-        log.info(f"Running analysis on {stock.name} ({stock.ticker_symbol})")
+        log.info(
+            f"Running technical analysis on {stock.name} ({stock.ticker_symbol})")
 
         # Fetch techical data
         techical_data = []
@@ -89,3 +90,18 @@ class StockInformationProcessor:
         advice_on_stock = self.stock_advisor.makeTechicalReport(
             technical_analysis)
         return advice_on_stock
+
+    def runFinancialAnalysis(self, stock: PortfolioItem) -> str:
+        log.info(
+            f"Running financial analysis on {stock.name} ({stock.ticker_symbol})")
+
+        # Fetch finanical data
+        financial_data = []
+        for fetcher in self.fin_fetchers:
+            data = fetcher.fetch_data(stock.ticker_symbol)
+            financial_data.append(data)
+        # Do finanical analysis
+        financial_analysis = self.financial_analyst.analyze(
+            financial_data, stock)
+
+        return financial_analysis["financial_report"]
