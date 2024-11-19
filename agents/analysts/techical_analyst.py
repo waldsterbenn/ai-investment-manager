@@ -71,9 +71,10 @@ class TechnicalAnalyst:
         user_prompt = f"""
                     You are an expert financial analyst. Analyse these technical data for for the stock: {stock.name} ({stock.ticker_symbol}).
                     {buy_info if buy_info else ""}
-                    Be concrete and precise. Avoid generic answers and disclaimers.
+                    Be concrete, precise and use human readable numbers (no scientific notation). 
+                    Generic answers and disclaimers are strictly forbidden.
                     Analyze trends, momentum, volatility, etc.
-                    Make a concise report in Markdown format, containing:
+                    Make a beautiful and concise report in Markdown format containing:
                         - Stock price.
                         - Stock performance numbers.
                         - Stock ytd growth.

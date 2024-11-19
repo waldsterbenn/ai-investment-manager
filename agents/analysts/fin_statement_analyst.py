@@ -80,9 +80,10 @@ class FinancialAnalyst:
             Analyse this financial statement for the stock {stock.name} ({stock.ticker_symbol}).
             {buy_info if buy_info else ""}
             Focus on the newest data, but also consider historical data.
-            Be concrete and precise. Avoid generic answers and disclaimers.
+            Be concrete, precise and use human readable numbers (no scientific notation). 
+            Generic answers and disclaimers are strictly forbidden.
 
-            Make a concise report in Markdown format containing:
+            Make a beautiful and concise report in Markdown format containing:
             - Profitability.
             - Growth.
             - Upside and downside risk.
