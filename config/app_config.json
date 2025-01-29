@@ -1,9 +1,9 @@
 {
   "llm_model": {
-    "llm_model_techical": "phi4",
-    "llm_model_financial": "phi4",
-    "llm_model_advisor_stock": "phi4",
-    "llm_model_advisor_healthcheck": "phi4",
-    "llm_model_report_summarizer": "phi4"
+    "llm_model_techical": "deepseek_r1_7b",
+    "llm_model_financial": "deepseek_r1_7b",
+    "llm_model_advisor_stock": "deepseek_r1_7b",
+    "llm_model_advisor_healthcheck": "deepseek_r1_7b",
+    "llm_model_report_summarizer": "deepseek_r1_7b"
   }
 }
