@@ -34,6 +34,8 @@ class SupportedModels(Enum):
     phi3_3b = 14
     llama3_2 = 15
     phi4 = 16
+    deepseek_r1_7b = 17
+    deepseek_r1_8b = 18
 
 
 # Før man kan bruge andre modeller skal man hente dem via "ollama pull <modelname>"
@@ -58,6 +60,8 @@ llm_models_config = {
     SupportedModels.qwen2_7b:  LlmModelConfig("qwen2", 128000),
     SupportedModels.llama3_2:  LlmModelConfig("llama3.2", 131072),
     SupportedModels.phi4:  LlmModelConfig("phi4", 16000),
+    SupportedModels.deepseek_r1_7b:  LlmModelConfig("deepseek-r1:7b", 120000),
+    SupportedModels.deepseek_r1_8b:  LlmModelConfig("deepseek-r1:8b", 120000),
 }
 
 
