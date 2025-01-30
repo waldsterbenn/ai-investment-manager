@@ -15,6 +15,7 @@ class LlmModelType(Enum):
     advisory = 3
     healthcheck = 4
     summarizer = 5
+    reportagent = 6
 
 
 class SupportedModels(Enum):
@@ -83,4 +84,6 @@ class LlmConfigFactory:
             return llm_models_config[SupportedModels[str(self.llm_model_config["llm_model_advisor_healthcheck"]).lower()]]
         if (modelType == LlmModelType.summarizer):
             return llm_models_config[SupportedModels[str(self.llm_model_config["llm_model_report_summarizer"]).lower()]]
+        if (modelType == LlmModelType.reportagent):
+            return llm_models_config[SupportedModels[str(self.llm_model_config["llm_model_report_agent"]).lower()]]
         raise Exception("Invalid model type")

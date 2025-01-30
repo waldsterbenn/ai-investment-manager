@@ -4,6 +4,7 @@
     "llm_model_financial": "deepseek_r1_7b",
     "llm_model_advisor_stock": "deepseek_r1_7b",
     "llm_model_advisor_healthcheck": "deepseek_r1_7b",
-    "llm_model_report_summarizer": "deepseek_r1_7b"
+    "llm_model_report_summarizer": "deepseek_r1_7b",
+    "llm_model_report_agent": "deepseek_r1_7b"
   }
 }
