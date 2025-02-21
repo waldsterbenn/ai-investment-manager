@@ -59,6 +59,7 @@ def get_yf_data(ticker) -> yf.Ticker:
     :param ticker: Stock ticker symbol as a string.
     :return: DataFrame with stock data.
     """
+    # yf.enable_debug_mode()
     # Fetch data
     data = yf.Ticker(ticker)
     return data
@@ -145,7 +146,9 @@ def hum_stock_analyzer_tool(ticker_symbol: str) -> tuple[dict, list[pd.DataFrame
     yf_ticker_data: yf.Ticker = get_yf_data(ticker_symbol)
     price_history: pd.DataFrame = fetch_stock_history_data(yf_ticker_data)
 
-    analyst_recommendations: pd.DataFrame = yf_ticker_data.get_recommendations_summary()
+    analyst_recommendations = yf_ticker_data.get_recommendations_summary()
+    if isinstance(analyst_recommendations, dict):
+        analyst_recommendations = pd.DataFrame([analyst_recommendations])
 
     history_with_ta: pd.DataFrame = techical_analysis(price_history)
 
@@ -166,8 +169,11 @@ def hum_stock_analyzer_tool(ticker_symbol: str) -> tuple[dict, list[pd.DataFrame
 
     info = get_essential_info(yf_ticker_data)
 
-    return (info, [round_dataframe_to_3dec(remove_dataframe_nan(history_with_ta)),
-                   analyst_recommendations])
+    trimmed_history = round_dataframe_to_3dec(
+        remove_dataframe_nan(history_with_ta))
+    arr = [trimmed_history, analyst_recommendations]
+
+    return (info, arr)
 
 
 """

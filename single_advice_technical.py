@@ -20,7 +20,6 @@ log = logging.getLogger('sampleLogger')
 def main():
     # Expected string: {'name':'John Deere','ticker_symbol':'DE','buy_price':386.12,'currency':'USD','buy_date':'2024-06-18'}
     arg = sys.argv[1].replace("'", '"')
-    # print(arg)
     jsonstr = json.loads(arg)
     stock = PortfolioItem(jsonstr)
     try:
