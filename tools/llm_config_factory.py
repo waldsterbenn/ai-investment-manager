@@ -39,6 +39,7 @@ class SupportedModels(Enum):
     deepseek_r1_8b = 18
 
 
+# Calculate the context window based on the model size here: https://huggingface.co/spaces/NyxKrage/LLM-Model-VRAM-Calculator
 # Før man kan bruge andre modeller skal man hente dem via "ollama pull <modelname>"
 llm_models_config = {
     SupportedModels.mistral_7B_v1:  LlmModelConfig("mistral7b", 8192),
@@ -60,9 +61,9 @@ llm_models_config = {
     # this is q4 default
     SupportedModels.qwen2_7b:  LlmModelConfig("qwen2", 128000),
     SupportedModels.llama3_2:  LlmModelConfig("llama3.2", 131072),
-    SupportedModels.phi4:  LlmModelConfig("phi4", 16000),
-    SupportedModels.deepseek_r1_7b:  LlmModelConfig("deepseek-r1:7b", 120000),
-    SupportedModels.deepseek_r1_8b:  LlmModelConfig("deepseek-r1:8b", 120000),
+    SupportedModels.phi4:  LlmModelConfig("phi4", 5120),
+    SupportedModels.deepseek_r1_7b:  LlmModelConfig("deepseek-r1:7b", 76800),
+    SupportedModels.deepseek_r1_8b:  LlmModelConfig("deepseek-r1:8b", 41984),
 }
 
 
