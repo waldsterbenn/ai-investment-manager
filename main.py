@@ -7,9 +7,9 @@ from components.report_generator import ReportGenerator
 import logging
 import logging.config
 
+from infrence_provider.infrence_provider_factory import InferenceProviderFactory
 from portfolio_loader import PortfolioLoader
 from stock_information_processor import StockInformationProcessor
-from tools.llm_config_factory import LlmConfigFactory, LlmModelType
 
 config_path = os.path.abspath(os.path.join(
     os.path.dirname(__file__), './config/'))
@@ -33,10 +33,9 @@ if __name__ == "__main__":
     except FileNotFoundError as e:
         log.error(e)
 
-    llm_model_config = app_config["llm_model"]
-    llmConfigFactory = LlmConfigFactory(llm_model_config)
     report_generator = ReportGenerator()
-    processor = StockInformationProcessor(api_keys, llmConfigFactory)
+    llm_provider = InferenceProviderFactory().create_provider(app_config)
+    processor = StockInformationProcessor(api_keys, llm_provider)
 
     base_folder = "reports"
     if not os.path.exists(base_folder):
@@ -67,11 +66,9 @@ if __name__ == "__main__":
             # Get the full path to the file
             files.append(os.path.join(foldername, filename))
 
-    summarizer = ReportSummarizer(
-        llmConfigFactory.getModel(LlmModelType.summarizer))
+    summarizer = ReportSummarizer(llm_provider)
 
-    portfolio_advisor = PortfolioAdvisor(
-        llmConfigFactory.getModel(LlmModelType.healthcheck), summarizer)
+    portfolio_advisor = PortfolioAdvisor(llm_provider, summarizer)
 
     advice = portfolio_advisor.provide_advice(files)
     advice_file = report_generator.write_advice_report(report_folder, advice)

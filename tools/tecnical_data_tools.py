@@ -89,7 +89,8 @@ def techical_analysis(df: pd.DataFrame):
     df['SMA_10'] = sma_short
     sma_long = ta.sma(df['Close'], length=50)
     df['SMA_50'] = sma_long
-    df['Golden Cross'] = sma_short > sma_long
+    df['Golden Cross'] = (
+        sma_short > sma_long) if sma_short is not None and sma_long is not None else pd.NA
 
     # Calculate MACD
     macd = ta.macd(df['Close'])

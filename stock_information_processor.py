@@ -5,8 +5,8 @@ from components.analysis_layer import FinancialStatementAnalyst, TechnicalDataAn
 from components.data_acq_layer import DataFetcher, FMPDataFetcher, FinnhubDataFetcher
 from components.data_fetchers.sec_edgar_fetcher import SecEdgarDataFetcher
 from components.data_fetchers.yfin_data_fetcher import YFinanceFinDataFetcher, YFinanceTechicalDataFetcher
+from infrence_provider.infrence_provider import InferenceProvider
 from portfolio_item import PortfolioItem
-from tools.llm_config_factory import LlmConfigFactory, LlmModelType
 import logging
 import logging.config
 
@@ -20,25 +20,22 @@ log = logging.getLogger('sampleLogger')
 
 class StockInformationProcessor:
     # Setup data fetchers and configure which LLM are used for each step in the process
-    def __init__(self, apiKeys: dict, llmConfigFactory: LlmConfigFactory):
+    def __init__(self, apiKeys: dict, infrenceProvider: InferenceProvider):
 
         self.ta_fetchers: List[DataFetcher] = []
         self.ta_fetchers.append(FMPDataFetcher())
         self.ta_fetchers.append(FinnhubDataFetcher())
         self.ta_fetchers.append(YFinanceTechicalDataFetcher())
 
-        llm_tech = llmConfigFactory.getModel(LlmModelType.techical)
-        self.technical_analyst = TechnicalDataAnalyst(llm_tech)
+        self.technical_analyst = TechnicalDataAnalyst(infrenceProvider)
 
         self.fin_fetchers: List[DataFetcher] = []
         self.fin_fetchers.append(YFinanceFinDataFetcher())
         self.fin_fetchers.append(SecEdgarDataFetcher())
 
-        llm_financial = llmConfigFactory.getModel(LlmModelType.finanical)
-        self.financial_analyst = FinancialStatementAnalyst(llm_financial)
+        self.financial_analyst = FinancialStatementAnalyst(infrenceProvider)
 
-        llm_advisor = llmConfigFactory.getModel(LlmModelType.advisory)
-        self.stock_advisor = StockAdvisor(llm_advisor)
+        self.stock_advisor = StockAdvisor(infrenceProvider)
 
     # Run techical analysis and gather fundamental data. Make advice for the stock
     def process(self, stock: PortfolioItem) -> str:

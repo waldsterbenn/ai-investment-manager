@@ -1,11 +1,9 @@
 import os
 import time
-from llama_index.llms.ollama import Ollama
+from infrence_provider.infrence_provider import InferenceProvider
 import logging
 import logging.config
-
 from agents.critics.prompts import Prompts
-from tools.llm_config_factory import LlmModelConfig
 
 # Load the logging configuration
 logging.config.fileConfig(os.path.abspath(os.path.join(
@@ -16,18 +14,11 @@ log = logging.getLogger('sampleLogger')
 
 
 class StockReportAgent:
-    def __init__(self, llm_model_to_use: LlmModelConfig, dry_run: bool = False) -> None:
-        self.llm_model_to_use = llm_model_to_use
+    def __init__(self, llm_provider: InferenceProvider, dry_run: bool = False) -> None:
+        self.llm_provider = llm_provider
         self.llm_temperature = 0.5
         self.dry_run = dry_run
         self.max_iterations = 2
-        self.llm_client = Ollama(
-            model=llm_model_to_use.name,
-            request_timeout=15000.0,
-            temperature=self.llm_temperature,
-            stream=False,
-            context_window=self.llm_model_to_use.context_window
-        )
 
     def hone_report(self, report_text: str) -> str:
 
@@ -75,7 +66,7 @@ class StockReportAgent:
 
         # Combine analyses and provide investment advice
         log.info(
-            f"LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
+            f"LLM: {self.llm_provider.get_provider_llm()}. Temperature: {self.llm_temperature}")
 
         user_prompt = f"""
                     {Prompts.reportAnalystPrompt}
@@ -89,13 +80,13 @@ class StockReportAgent:
                 """
 
         log.info(f"LLM analysing query. Prompt {len(user_prompt)} chars.")
-        report_text = self.invoke_llm(self.llm_client, user_prompt)
+        report_text = self.invoke_llm(user_prompt)
         return report_text
 
     def critique_report(self, report_text: str) -> str:
 
         log.info(
-            f"LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
+            f"LLM: {self.llm_provider.get_provider_llm()}. Temperature: {self.llm_temperature}")
 
         user_prompt = f"""
                     {Prompts.critique}
@@ -107,10 +98,10 @@ class StockReportAgent:
                 """
 
         log.info(f"LLM analysing query. Prompt {len(user_prompt)} chars.")
-        report_text = self.invoke_llm(self.llm_client, user_prompt)
+        report_text = self.invoke_llm(user_prompt)
         return report_text
 
-    def invoke_llm(self, ollama_client, user_prompt):
-        ollama_completion = ollama_client.complete(user_prompt)
-        report_text = ollama_completion.text
+    def invoke_llm(self, user_prompt):
+        report_text = self.llm_provider.infer(
+            user_prompt, temperature=self.llm_temperature)
         return report_text.strip()

@@ -1,11 +1,13 @@
 from agents.advisors.stock_advisor import StockAdvisor
-from tools.llm_config_factory import LlmConfigFactory, LlmModelType
+from infrence_provider.infrence_provider_factory import InferenceProviderFactory
 import logging.config
 import logging
 import json
 import os
 import sys
 import base64
+
+from tools.unicode_safety import UnicodeSafety
 
 config_path = os.path.abspath(os.path.join(
     os.path.dirname(__file__), './config/'))
@@ -31,14 +33,12 @@ def main():
     except FileNotFoundError as e:
         log.error(e)
 
-    llm_model_config = app_config["llm_model"]
-    llmConfigFactory = LlmConfigFactory(llm_model_config)
-    llm_advisor = llmConfigFactory.getModel(LlmModelType.advisory)
-    stock_advisor = StockAdvisor(llm_advisor)
+    llm_provider = InferenceProviderFactory().create_provider(app_config)
+    stock_advisor = StockAdvisor(llm_provider)
     advice_on_stock = stock_advisor.provide_advice(
         technical_analysis, financial_analysis)
 
-    print("ADVICE:"+advice_on_stock)
+    print(UnicodeSafety().makeSafe("ADVICE:" + advice_on_stock))
 
 
 if __name__ == "__main__":

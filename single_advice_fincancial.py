@@ -1,4 +1,4 @@
-from tools.llm_config_factory import LlmConfigFactory
+from infrence_provider.infrence_provider_factory import InferenceProviderFactory
 from stock_information_processor import StockInformationProcessor
 from portfolio_item import PortfolioItem
 import logging.config
@@ -6,6 +6,8 @@ import logging
 import json
 import os
 import sys
+
+from tools.unicode_safety import UnicodeSafety
 
 
 config_path = os.path.abspath(os.path.join(
@@ -19,6 +21,7 @@ log = logging.getLogger('sampleLogger')
 
 def main():
     # python removes qoutes form paramter strings, just because
+    # Expected string: "{'name':'John Deere','ticker_symbol':'DE','buy_price':386.12,'currency':'USD','buy_date':'2024-06-18'}"
     arg = sys.argv[1].replace("'", '"')
     jsonstr = json.loads(arg)
     stock = PortfolioItem(jsonstr)
@@ -34,12 +37,10 @@ def main():
     except FileNotFoundError as e:
         log.error(e)
 
-    llm_model_config = app_config["llm_model"]
-    llmConfigFactory = LlmConfigFactory(llm_model_config)
-    processor = StockInformationProcessor(api_keys, llmConfigFactory)
-
+    llm_provider = InferenceProviderFactory().create_provider(app_config)
+    processor = StockInformationProcessor(api_keys, llm_provider)
     advice_on_stock = processor.runFinancialAnalysis(stock)
-    print("FINREPORT:" + advice_on_stock)
+    print(UnicodeSafety().makeSafe("FINREPORT:" + advice_on_stock))
 
 
 if __name__ == "__main__":

@@ -13,10 +13,9 @@
 """
 import os
 from typing import Dict
-from llama_index.llms.ollama import Ollama
 from components.data_acq_layer import StockDataTech
+from infrence_provider.infrence_provider import InferenceProvider
 from portfolio_item import PortfolioItem
-from tools.llm_config_factory import LlmModelConfig
 import logging
 import logging.config
 
@@ -30,26 +29,19 @@ log = logging.getLogger('sampleLogger')
 
 class TechnicalAnalyst:
 
-    def __init__(self, llm_model_to_use: LlmModelConfig, dry_run: bool = False) -> None:
-        self.llm_model_to_use = llm_model_to_use
+    def __init__(self, llm_provider: InferenceProvider, dry_run: bool = False) -> None:
+        self.llm_provider = llm_provider
         self.llm_temperature = 0.2
         self.dry_run = dry_run
 
     def analyse_technicals(self, data: list[StockDataTech], stock: PortfolioItem) -> Dict[str, str]:
 
         if self.dry_run:
-            {"techical_report":
-                f"This is a report containing Technical Analysis of the stock {stock.name} ({stock.ticker_symbol})"}
+            return {"techical_report":
+                    f"This is a report containing Technical Analysis of the stock {stock.name} ({stock.ticker_symbol})"}
 
         log.info(
-            f"Techical analysis of {stock.name} ({stock.ticker_symbol}). LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
-        ollama_client = Ollama(
-            model=self.llm_model_to_use.name,
-            request_timeout=15000.0,
-            temperature=self.llm_temperature,
-            stream=False,
-            context_window=self.llm_model_to_use.context_window
-        )
+            f"Techical analysis of {stock.name} ({stock.ticker_symbol}). LLM: {self.llm_provider.get_provider_name()} {self.llm_provider.get_provider_llm()}. Temperature: {self.llm_temperature}")
 
         data_inject = ""
         for value in data:
@@ -87,6 +79,7 @@ class TechnicalAnalyst:
                 """
         log.info(f"LLM analysing query. Prompt {len(user_prompt)} chars.")
 
-        ollama_completion = ollama_client.complete(user_prompt)
-        report_text = ollama_completion.text
+        report_text = self.llm_provider.infer(
+            user_prompt, temperature=self.llm_temperature)
+
         return {"techical_report": report_text.strip()}

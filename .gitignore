@@ -1,6 +1,6 @@
 .conda_invst_mgr/
 __pycache__*
-
+.vscode/
 reports/
 data/
 

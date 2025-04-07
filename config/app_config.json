@@ -1,10 +1,16 @@
 {
-  "llm_model": {
-    "llm_model_techical": "deepseek_r1_7b",
-    "llm_model_financial": "deepseek_r1_7b",
-    "llm_model_advisor_stock": "deepseek_r1_7b",
-    "llm_model_advisor_healthcheck": "deepseek_r1_7b",
-    "llm_model_report_summarizer": "deepseek_r1_7b",
-    "llm_model_report_agent": "deepseek_r1_7b"
+  "active_provider_type": "groq",
+
+  "groq_config": {
+    "provider_type": "groq",
+    "name_of_api_key": "GROQ_API_KEY",
+    "model": "meta-llama/llama-4-scout-17b-16e-instruct"
+  },
+
+  "ollama_config": {
+    "provider_type": "ollama",
+    "base_url": "http://localhost:11434",
+    "model": "deepseek-r1:7b",
+    "context_window": 76800
   }
 }

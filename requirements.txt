@@ -4,12 +4,13 @@ requests
 tabulate
 beautifulsoup4
 nltk
-
-ollama
-llama-index-core
-llama-index-llms-ollama
+scipy
+numpy==1.26.3
+scikit-learn 
 
 sec-edgar-downloader
 sec-cik-mapper
 
 yfinance
+groq
+ollama

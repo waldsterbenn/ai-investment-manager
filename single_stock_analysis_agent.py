@@ -1,14 +1,15 @@
-from agents.advisors.stock_advisor import StockAdvisor
 from agents.critics.stock_report_agent import StockReportAgent
+from infrence_provider.infrence_provider_factory import InferenceProviderFactory
 from portfolio_item import PortfolioItem
 from stock_information_processor import StockInformationProcessor
-from tools.llm_config_factory import LlmConfigFactory, LlmModelType
 import logging.config
 import logging
 import json
 import os
 import sys
 import base64
+
+from tools.unicode_safety import UnicodeSafety
 
 config_path = os.path.abspath(os.path.join(
     os.path.dirname(__file__), './config/'))
@@ -163,19 +164,6 @@ log = logging.getLogger('sampleLogger')
 # **Investment Potential:** High
 
 #     """
-#     try:
-#         with open(os.path.join(config_path, "app_config.json")) as f:
-#             app_config = json.load(f)
-
-#     except FileNotFoundError as e:
-#         log.error(e)
-
-#     llm_model_config = app_config["llm_model"]
-#     llmConfigFactory = LlmConfigFactory(llm_model_config)
-#     llm_model = llmConfigFactory.getModel(LlmModelType.reportagent)
-#     agent = StockReportAgent(llm_model)
-#     out = agent.hone_report(report_text)
-#     print(out)
 
 
 def main():
@@ -197,16 +185,13 @@ def main():
     except FileNotFoundError as e:
         log.error(e)
 
-    llm_model_config = app_config["llm_model"]
-    llmConfigFactory = LlmConfigFactory(llm_model_config)
-
-    processor = StockInformationProcessor(api_keys, llmConfigFactory)
+    llm_provider = InferenceProviderFactory().create_provider(app_config)
+    processor = StockInformationProcessor(api_keys, llm_provider)
     report_text: str = processor.process(stock)
 
-    llm_model = llmConfigFactory.getModel(LlmModelType.reportagent)
-    agent = StockReportAgent(llm_model)
+    agent = StockReportAgent(llm_provider)
     finished_report = agent.hone_report(report_text)
-    print("REPORT:"+finished_report)
+    print(UnicodeSafety().makeSafe("REPORT:" + finished_report))
 
 
 if __name__ == "__main__":

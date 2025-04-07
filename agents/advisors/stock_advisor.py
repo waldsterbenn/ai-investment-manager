@@ -13,11 +13,11 @@
 
 import os
 from typing import Dict
-from llama_index.llms.ollama import Ollama
+
 import logging
 import logging.config
 
-from tools.llm_config_factory import LlmModelConfig
+from infrence_provider.infrence_provider import InferenceProvider
 
 try:
     # Load the logging configuration
@@ -31,8 +31,8 @@ except FileNotFoundError:
 
 
 class StockAdvisor:
-    def __init__(self, llm_model_to_use: LlmModelConfig, dry_run: bool = False) -> None:
-        self.llm_model_to_use = llm_model_to_use
+    def __init__(self,  llm_provider: InferenceProvider, dry_run: bool = False) -> None:
+        self.llm_provider = llm_provider
         self.llm_temperature = 0.3
         self.dry_run = dry_run
 
@@ -42,15 +42,7 @@ class StockAdvisor:
 
         # Combine analyses and provide investment advice
         log.info(
-            f"Advisor analysis LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
-
-        ollama_client = Ollama(
-            model=self.llm_model_to_use.name,
-            request_timeout=15000.0,
-            temperature=self.llm_temperature,
-            stream=False,
-            context_window=self.llm_model_to_use.context_window
-        )
+            f"Advisor analysis. LLM: {self.llm_provider.get_provider_name()} {self.llm_provider.get_provider_llm()}. Temperature: {self.llm_temperature}")
 
         user_prompt = f"""
                     You are an expert financial advisor with expertice in trading on the stock market.
@@ -71,8 +63,8 @@ class StockAdvisor:
                     ---
                 """
         log.info(f"LLM analysing query. Prompt {len(user_prompt)} chars.")
-        ollama_completion = ollama_client.complete(user_prompt)
-        report_text = ollama_completion.text
+        report_text = self.llm_provider.infer(
+            user_prompt, temperature=self.llm_temperature)
         return report_text.strip()
 
     def provide_advice(self, technical_analysis: Dict[str, str], financial_analysis: Dict[str, str]) -> str:
@@ -81,15 +73,7 @@ class StockAdvisor:
 
         # Combine analyses and provide investment advice
         log.info(
-            f"Advisor analysis LLM: {self.llm_model_to_use.name}. Context Window: {self.llm_model_to_use.context_window}. Temperature: {self.llm_temperature}")
-
-        ollama_client = Ollama(
-            model=self.llm_model_to_use.name,
-            request_timeout=15000.0,
-            temperature=self.llm_temperature,
-            stream=False,
-            context_window=self.llm_model_to_use.context_window
-        )
+            f"Advisor analysis. LLM: {self.llm_provider.get_provider_name()} {self.llm_provider.get_provider_llm()}. Temperature: {self.llm_temperature}")
 
         user_prompt = f"""
                     You are an expert financial advisor with expertice in trading on the stock market.
@@ -116,6 +100,6 @@ class StockAdvisor:
                     ---
                 """
         log.info(f"LLM analysing query. Prompt {len(user_prompt)} chars.")
-        ollama_completion = ollama_client.complete(user_prompt)
-        report_text = ollama_completion.text
+        report_text = self.llm_provider.infer(
+            user_prompt, temperature=self.llm_temperature)
         return report_text.strip()
