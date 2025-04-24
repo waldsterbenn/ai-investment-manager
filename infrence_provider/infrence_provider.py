@@ -21,6 +21,14 @@ class InferenceProvider(ABC):
         pass
 
     @abstractmethod
+    def infer_structured(self, prompt: str, expected_format: str, temperature: float = 1.0) -> str:
+        """
+        Perform inference based on the given prompt.
+        kwargs can be used for provider-specific parameters like temperature, max_tokens etc.
+        """
+        pass
+
+    @abstractmethod
     def get_provider_name(self) -> str:
         """Return the name of the provider."""
         pass

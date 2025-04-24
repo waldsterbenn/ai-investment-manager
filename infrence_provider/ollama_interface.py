@@ -33,6 +33,10 @@ class OllamaInterface(InferenceProvider):
 
         return response['response']
 
+    def infer_structured(self, prompt: str, expected_format: str, temperature: float = 1.0) -> str:
+        raise NotImplementedError(
+            "Structured inference is not implemented for OllamaInterface.")
+
     def get_provider_name(self) -> str:
         return "Ollama"
 

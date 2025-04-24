@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import Dict, List
 from agents.advisors.stock_advisor import StockAdvisor
 from components.analysis_layer import FinancialStatementAnalyst, TechnicalDataAnalyst
 from components.data_acq_layer import DataFetcher, FMPDataFetcher, FinnhubDataFetcher
@@ -38,21 +38,29 @@ class StockInformationProcessor:
         self.stock_advisor = StockAdvisor(infrenceProvider)
 
     # Run techical analysis and gather fundamental data. Make advice for the stock
-    def process(self, stock: PortfolioItem) -> str:
+    def process(self, stock: PortfolioItem) -> Dict[str, str]:
         log.info(f"Running analysis on {stock.name} ({stock.ticker_symbol})")
 
         # Fetch techical data
         techical_data = []
         for fetcher in self.ta_fetchers:
-            data = fetcher.fetch_data(stock.ticker_symbol)
-            if (data.info is not None or data.techical_indicators is not None):
-                techical_data.append(data)
+            try:
+                data = fetcher.fetch_data(stock.ticker_symbol)
+                if (data.info is not None or data.techical_indicators is not None):
+                    techical_data.append(data)
+            except Exception as e:
+                log.error(
+                    f"Error fetching technical data for {stock.ticker_symbol} from {fetcher.__class__.__name__}: {e}")
 
         # Fetch finanical data
         financial_data = []
         for fetcher in self.fin_fetchers:
-            data = fetcher.fetch_data(stock.ticker_symbol)
-            financial_data.append(data)
+            try:
+                data = fetcher.fetch_data(stock.ticker_symbol)
+                financial_data.append(data)
+            except Exception as e:
+                log.error(
+                    f"Error fetching financial data for {stock.ticker_symbol} from {fetcher.__class__.__name__}: {e}")
 
         # Analyse the stock based on techicals
         technical_analysis = self.technical_analyst.analyze(
@@ -66,7 +74,7 @@ class StockInformationProcessor:
         advice_on_stock = self.stock_advisor.provide_advice(
             technical_analysis, financial_analysis)
 
-        return advice_on_stock
+        return {"advice_on_stock": advice_on_stock, "financial_report": financial_analysis["financial_report"], "technical_report": technical_analysis["technical_report"]}
 
     def runTechicalAnalysis(self, stock: PortfolioItem) -> str:
         log.info(

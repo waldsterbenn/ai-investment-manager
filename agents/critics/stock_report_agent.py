@@ -101,6 +101,29 @@ class StockReportAgent:
         report_text = self.invoke_llm(user_prompt)
         return report_text
 
+    def tablebot(self, financial_report: str, technical_report: str) -> str:
+
+        log.info(
+            f"LLM: {self.llm_provider.get_provider_llm()}. Temperature: {self.llm_temperature}")
+
+        user_prompt = f"""
+                    {Prompts.tablebot}
+                    
+                    ¤Financial Stock Report¤:
+                    ---
+                    {financial_report}
+                    ---
+                    ¤Techical Stock Report¤:
+                    {technical_report}
+                    ---
+                """
+
+        log.info(f"LLM analysing query. Prompt {len(user_prompt)} chars.")
+
+        report_text = self.llm_provider.infer_structured(
+            user_prompt, "html", temperature=self.llm_temperature)
+        return report_text
+
     def invoke_llm(self, user_prompt):
         report_text = self.llm_provider.infer(
             user_prompt, temperature=self.llm_temperature)

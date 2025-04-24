@@ -56,7 +56,7 @@ if __name__ == "__main__":
             continue  # Skip existing reports
         advice_on_stock = processor.process(stock)
         report_path = report_generator.write_stock_report(
-            report_folder, stock.ticker_symbol, advice_on_stock)
+            report_folder, stock.ticker_symbol, advice_on_stock["advice_on_stock"])
 
     files = []
     for foldername, subfolders, filenames in os.walk(report_folder):

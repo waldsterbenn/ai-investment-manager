@@ -10,3 +10,4 @@ class Prompts:
     If the text can be improved, provide your feedback as an instruction on what should be changed.
     If no further improvement is needed, indicate this with a clear 'DONE' as the last word in your reply.
     Do not repeat the report information. Only give your feedback."""
+    tablebot = """You are a databot that can create a html table with the key techical indicators (ie. MACD) and fundamentals (ie. PE) of a stock."""

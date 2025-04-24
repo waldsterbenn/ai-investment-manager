@@ -58,6 +58,21 @@ class GroqInterface(InferenceProvider):
         )
         return response.choices[0].message.content or ""
 
+    def infer_structured(self, prompt: str, expected_format: str, temperature: float = 1.0) -> str:
+        # Placeholder for actual Groq API call
+        response = self.client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}, {
+                "role": "assistant",
+                "content": f"```{expected_format}"
+            }],
+            model=self.model,
+            temperature=temperature,
+            # max_completion_tokens=1024,
+            # top_p=1,
+            stop="```",
+        )
+        return response.choices[0].message.content or ""
+
     def get_provider_name(self) -> str:
         return "Groq"
 

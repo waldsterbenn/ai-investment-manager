@@ -82,4 +82,4 @@ class TechnicalAnalyst:
         report_text = self.llm_provider.infer(
             user_prompt, temperature=self.llm_temperature)
 
-        return {"techical_report": report_text.strip()}
+        return {"technical_report": report_text.strip()}

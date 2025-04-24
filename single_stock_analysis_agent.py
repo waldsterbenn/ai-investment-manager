@@ -1,3 +1,4 @@
+from typing import Dict
 from agents.critics.stock_report_agent import StockReportAgent
 from infrence_provider.infrence_provider_factory import InferenceProviderFactory
 from portfolio_item import PortfolioItem
@@ -187,11 +188,22 @@ def main():
 
     llm_provider = InferenceProviderFactory().create_provider(app_config)
     processor = StockInformationProcessor(api_keys, llm_provider)
-    report_text: str = processor.process(stock)
+    report_text: Dict[str, str] = processor.process(stock)
 
     agent = StockReportAgent(llm_provider)
-    finished_report = agent.hone_report(report_text)
-    print(UnicodeSafety().makeSafe("REPORT:" + finished_report))
+    finished_report = agent.hone_report(report_text["advice_on_stock"])
+    table = agent.tablebot(report_text["financial_report"],
+                           report_text["technical_report"])
+    rep = UnicodeSafety().makeSafe(finished_report)
+    table = UnicodeSafety().makeSafe(table)
+    ret = json.dumps(
+        {
+            "analysis": rep,
+            "table": table
+        },
+        ensure_ascii=False
+    )
+    print("OUTPUTDATA:"+ret)
 
 
 if __name__ == "__main__":
